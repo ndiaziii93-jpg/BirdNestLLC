@@ -1,0 +1,174 @@
+/* App-level additions on top of the prototype stylesheet: nav links, present mode,
+   sign-in page, error bar, and the responsive layouts for iPad and iPhone. */
+
+.top .nav a{height:36px;padding:0 14px;display:flex;align-items:center;font-size:14px;border-radius:10px;text-decoration:none;color:#B9CFCD;font-weight:600;cursor:pointer;border:1px solid transparent;transition:border-color .15s,color .15s,background .15s}
+.top .nav a:hover{color:#F6F4EF;border-color:rgba(201,165,110,.4);text-decoration:none}
+.top .nav a.on{background:rgba(246,244,239,.12);color:#F6F4EF;border-color:#C9A56E;box-shadow:inset 0 0 0 .5px #C9A56E}
+.top .pres{height:36px;padding:0 12px;border:1px solid rgba(246,244,239,.25);border-radius:10px;background:transparent;color:#B9CFCD;font-size:12px;font-weight:500;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.top .pres:hover{color:#F6F4EF;border-color:rgba(201,165,110,.6)}
+.top .pres.on{background:#C9A56E;border-color:#C9A56E;color:#0B1A1B}
+.foot{display:flex;align-items:center;gap:16px}
+.foot .signout{border:0;background:none;padding:0;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--faint);cursor:pointer}
+.foot .signout:hover{color:var(--teal)}
+.dberr{margin:16px 24px 0;padding:12px 16px;border-radius:12px;background:#F4E4E1;color:#A3352B;font-size:13px}
+.dberr code{font-family:var(--mono);font-size:12px}
+.errbar{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);z-index:60;display:flex;gap:14px;align-items:center;padding:10px 14px 10px 16px;border-radius:12px;background:#1A1D20;color:#F6F4EF;font-size:13px;box-shadow:0 1px 2px rgba(26,29,32,.04),0 12px 32px rgba(26,29,32,.2)}
+.errbar button{border:0;background:none;color:#F6F4EF;font-size:18px;line-height:1;cursor:pointer}
+.sheet-hidden{display:none}
+.modal.show{display:flex}
+.mxm.show{display:flex}
+
+/* Sign-in */
+.signin{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:var(--bg)}
+.sicard{width:min(440px,100%);background:#fff;border:1px solid var(--line);border-radius:24px;padding:36px 32px;display:flex;flex-direction:column;gap:14px;align-items:flex-start}
+.sicard h1{margin:12px 0 0;font-size:22px;line-height:28px;font-weight:400;letter-spacing:-.02em}
+.sicard p{margin:0;font-size:14px;color:var(--muted)}
+.sicard .sierr{color:#A3352B}
+.sibtn{display:inline-flex;align-items:center;gap:10px;margin-top:8px;text-decoration:none}
+.sibtn:hover{text-decoration:none;color:#F6F4EF}
+.sicard .mfootl{margin:14px 0 0}
+
+/* Present mode: read-only, private notes hidden */
+[data-present] .edit-only{display:none!important}
+[data-present] .priv-note{display:none!important}
+[data-present] .top .pres{box-shadow:0 0 0 3px rgba(201,165,110,.25)}
+[data-present] .pname,[data-present] .prat,[data-present] .why,[data-present] .pf input,[data-present] .pf select,[data-present] .pf textarea{pointer-events:none}
+[data-present] .segs button,[data-present] .prights button,[data-present] .pdec button,[data-present] .plogo,[data-present] button.chip,[data-present] .phase.edit i{pointer-events:none}
+[data-present] .kc{cursor:default}
+
+/* Phase / ladder tweaks the prototype applied through JS */
+.rung .n,.row .c{font-variant-numeric:tabular-nums}
+.mono,.ring b,.count b,.fitc .fn,.res .fn{font-variant-numeric:tabular-nums}
+
+/* Add-company confidence tags inherit from views.css; profile buy-box editor */
+.bbx{display:flex;flex-direction:column;gap:12px}
+.bbx .sub{margin:0}
+.bbx .akv input{height:32px;border:1px solid var(--line);border-radius:6px;padding:0 8px;font-size:13px;background:#fff;outline:none;width:100%}
+.bbx .akv input:focus{border-color:var(--teal)}
+.bbx .mrow2{display:grid;grid-template-columns:110px minmax(0,1fr) 28px;gap:8px;align-items:center}
+.bbx .mrow2 button{width:28px;height:28px;border:0;border-radius:6px;background:none;color:var(--faint)}
+.bbx .mrow2 button:hover{background:var(--sunken);color:#A3352B}
+.bbx .addrow{display:flex;gap:6px}
+.bbx .addrow input{flex:1;height:32px;border:1px solid var(--line);border-radius:6px;padding:0 8px;font-size:13px;outline:none}
+.bbx .addrow input:focus{border-color:var(--teal)}
+.bbx .addrow button{height:32px;padding:0 10px;border:1px solid var(--strong);border-radius:8px;background:#fff;font-size:12px}
+.plens{display:flex;padding:3px;background:var(--sunken);border-radius:10px;gap:2px}
+.plens button{flex:1;height:32px;border:0;border-radius:8px;background:transparent;color:var(--muted);font-size:12px}
+.plens button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(26,29,32,.08);font-weight:500}
+.sample-tag{font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;padding:2px 6px;border-radius:4px;background:var(--brassSoft);color:var(--brassInk)}
+.empty-state{margin:24px;padding:48px 32px;background:#fff;border:1px solid var(--line);border-radius:24px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}
+.empty-state h2{margin:0;font-size:22px;line-height:28px;font-weight:400;letter-spacing:-.02em}
+.empty-state p{margin:0;font-size:14px;color:var(--muted);max-width:560px}
+.empty-state .btns{display:flex;gap:8px;margin-top:8px}
+.vhead .vact .primary{height:40px}
+.kc[draggable=true]{-webkit-user-drag:element}
+
+/* Responsive: iPad (≤1180) and iPhone (≤760). Desktop stays exactly as prototyped above 1180. */
+@media (max-width:1180px){
+  .app{min-width:0}
+  .top{gap:16px;padding:0 16px}
+  .top .search{width:200px}
+  .top .nav a{padding:0 10px}
+  .main{height:auto;grid-template-columns:minmax(0,1fr);padding:16px 16px 0}
+  .mapwrap{min-height:420px;height:420px}
+  .card{min-height:0}
+  .strip{margin:16px 16px 0;grid-template-columns:minmax(0,1fr);grid-template-rows:auto 320px;height:auto}
+  .sleft{border-right:0;border-bottom:1px solid var(--line)}
+  .refine{height:auto;margin:16px;grid-template-columns:1fr 1fr}
+  .refine .col:last-child{grid-column:1/-1;border-left:0;border-top:1px solid var(--line);min-height:300px}
+  #refine{height:auto!important}
+  .vw{padding:16px 16px 32px}
+  .sheet,.psheet,.acs,.asheet,.xwrap,.mxs{width:100%;height:100%;border-radius:16px}
+  .modal,.mxm{padding:12px}
+  .pbody{grid-template-columns:1fr;overflow:auto}
+  .pleft{border-right:0;border-bottom:1px solid var(--line)}
+  .pbody>div{overflow:visible}
+  .acb{grid-template-columns:1fr}
+  .xwrap{grid-template-columns:minmax(0,1fr) 260px}
+  .dsgrid{grid-template-columns:1fr}
+  .drail{position:static}
+  .sgrid{grid-template-columns:1fr}
+  .pbwrap.open{grid-template-columns:1fr}
+  .pdrawer{position:static;max-height:none}
+  .ppulse{grid-template-columns:repeat(3,minmax(0,1fr));row-gap:8px}
+  .ppulse div{border-left:0;padding-left:0}
+}
+@media (max-width:760px){
+  html{-webkit-text-size-adjust:100%}
+  .top{height:auto;flex-wrap:wrap;gap:10px;padding:10px 12px 10px;position:sticky;top:0;z-index:15}
+  .top .lock{order:0}
+  .top .sp{display:none}
+  .top .pres{order:1;margin-left:auto}
+  .top .primary{order:2;height:36px;padding:0 12px}
+  .top .search{order:3;width:100%;height:36px}
+  .top .nav{order:4;width:100%;gap:0;overflow-x:auto;scrollbar-width:none;margin:0 -12px;padding:0 12px;width:calc(100% + 24px)}
+  .top .nav a{flex:none;height:32px;font-size:13px}
+  .main{padding:12px 12px 0}
+  .mapwrap{height:340px;min-height:340px;border-radius:16px}
+  .regions{left:10px;top:10px}
+  .rg{height:28px;padding:0 9px;font-size:12px}
+  .legend{display:none}
+  .asof{display:none}
+  .card{border-radius:16px;padding:16px}
+  .cname{font-size:24px;line-height:28px}
+  .strip{margin:12px 12px 0;border-radius:16px;grid-template-rows:auto 280px}
+  .ovw{grid-template-columns:1fr}
+  .donut{display:none}
+  .lhead,.strip .res{grid-template-columns:24px minmax(0,1.6fr) minmax(0,1fr) 90px;padding:0 12px}
+  .lhead span:nth-child(4),.strip .res>span:nth-child(4){display:none}
+  .refine{margin:12px;grid-template-columns:1fr;border-radius:16px}
+  .refine .col{border-left:0;border-top:1px solid var(--line)}
+  .refine .col:first-child{border-top:0}
+  #indCol .ind2{grid-template-columns:1fr}
+  #indCol .e-grid{border-left:0;padding-left:0;max-height:260px}
+  .vw{padding:12px 12px 48px;gap:14px}
+  .vhead{flex-direction:column;align-items:stretch;gap:10px}
+  .vhead h1{font-size:26px;line-height:30px}
+  .vsearch{width:100%}
+  .vbar{gap:8px}
+  .vseg{overflow-x:auto;max-width:100%;scrollbar-width:none}
+  .ctable{border-radius:12px}
+  .chead>:nth-child(2),.crow>:nth-child(2){position:static;box-shadow:none}
+  .cgrid{grid-template-columns:1fr}
+  .board{grid-template-columns:repeat(8,260px)}
+  .kcol{min-height:320px}
+  .ppulse{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dadd .r{flex-direction:column;align-items:stretch}
+  .dadd select{width:100%}
+  .dadd input[type=text]{min-width:0}
+  .drow{grid-template-columns:72px minmax(0,1fr);row-gap:4px;padding:10px 12px}
+  .drow .ty{grid-column:1}.drow .co{grid-column:2}.drow .tx{grid-column:1/-1}.drow .pv{grid-column:2;justify-self:start}
+  .wrow{grid-template-columns:1fr;gap:8px}
+  .wrow input[type=number]{width:72px}
+  .stabs{gap:18px;overflow-x:auto}
+  .plgrid{grid-template-columns:1fr}
+  .modal,.mxm{padding:0}
+  .sheet,.psheet,.acs,.asheet,.xwrap,.mxs{border-radius:0;max-height:100%}
+  .pbrand{padding:12px 14px;gap:12px;flex-wrap:wrap}
+  .pbrand .lock,.pbrand>.vr,.mtop>.lock,.mtop>.vr{display:none}
+  .ptop{flex-wrap:wrap;padding:14px 16px;gap:14px}
+  .pdecw{width:100%}
+  .pname{font-size:28px;line-height:34px}
+  .pgrid{grid-template-columns:1fr}
+  .pleft,.pright{padding:16px}
+  .sc{grid-template-columns:minmax(0,1fr) 56px;gap:8px 10px}
+  .sc .segs{grid-column:1/-1}
+  .pfoot{flex-wrap:wrap;gap:8px;padding:12px 16px}
+  .pcomp{width:100%}
+  .mfootl{display:none}
+  .acb{padding:14px;gap:12px}
+  .acst{gap:12px;flex-wrap:wrap}
+  .fr{grid-template-columns:minmax(0,1fr) auto;row-gap:6px}
+  .fr .why{grid-column:1/-1}
+  .xwrap{grid-template-columns:1fr;grid-template-rows:minmax(0,1fr) auto}
+  .xside{border-left:0;border-top:1px solid var(--line);max-height:46vh}
+  .xprev{padding:12px}
+  .mhead,.mrow{padding:0 14px}
+  .mtop{padding:14px 16px;gap:12px;flex-wrap:wrap}
+  .mtop .mstat{display:none}
+  .asteps{display:none}
+  .abody{padding:16px}
+  .agrid{grid-template-columns:1fr}
+  .empty-state{margin:12px;padding:28px 20px}
+  .foot{padding:0 16px 12px;margin-top:0}
+}
