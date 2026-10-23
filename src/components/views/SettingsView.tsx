@@ -8,6 +8,15 @@ import { CompactMark, XIcon } from '../Lockup';
 import { Seg } from '../bits';
 import { ViewHead } from './ViewHead';
 
+/** Number box that commits on blur or Enter, like the prototype's onchange, so typing "40" is one step not two. */
+function NumberBox({ value, label, onCommit }: { value: number; label: string; onCommit: (v: number) => void }) {
+  const [text, setText] = useState(String(value));
+  const [seen, setSeen] = useState(value);
+  if (seen !== value) { setSeen(value); setText(String(value)); }
+  const commit = () => { const v = +text; if (!Number.isNaN(v) && v !== value) onCommit(v); else setText(String(value)); };
+  return <input type="number" min={0} max={50} step={5} value={text} aria-label={label} onChange={e => setText(e.target.value)} onBlur={commit} onKeyDown={e => { if (e.key === 'Enter') commit(); }} />;
+}
+
 export function SettingsView() {
   const { companies, settings, today, applyWeights, setPicklist, loadSample, clearSample } = useStore();
   const [tab, setTab] = useState<'weights' | 'lists' | 'data'>('weights');
@@ -50,7 +59,7 @@ export function SettingsView() {
         <div className="vbar"><Seg opts={['Partnering', 'Services client']} cur={lens} onPick={v => { setLens(v); setMsg(''); }} /><span className="mu" style={{ fontSize: 13 }}>{P ? 'Default lens. Fit is the weighted sum of six 1–5 scores, scaled to 100.' : 'Used for companies switched to the Services client lens on their profile.'}</span></div>
         <div className="sgrid">
           <div className="spanel"><h2>Weights</h2><p>Weights always total 100. Moving one slider rebalances the others in steps of 5. Changes apply to every company on this lens when you press Apply.</p>
-            <div>{crit.map((c, i) => <div key={c[0]} className="wrow"><div><b>{c[0]}</b><small>{c[2]}</small></div><input type="range" min={0} max={50} step={5} value={c[1]} aria-label={`${c[0]} weight`} onChange={e => setOne(i, +e.target.value)} /><input type="number" min={0} max={50} step={5} value={c[1]} aria-label={`${c[0]} weight value`} onChange={e => setOne(i, +e.target.value)} /></div>)}</div>
+            <div>{crit.map((c, i) => <div key={c[0]} className="wrow"><div><b>{c[0]}</b><small>{c[2]}</small></div><input type="range" min={0} max={50} step={5} value={c[1]} aria-label={`${c[0]} weight`} onChange={e => setOne(i, +e.target.value)} /><NumberBox value={c[1]} label={`${c[0]} weight value`} onCommit={v => setOne(i, v)} /></div>)}</div>
             <div className="wtot"><span className="t">Total <b id="wtot" className={tot === 100 ? '' : 'bad'}>{tot}</b> of 100</span><div className="btns edit-only"><button className="sec" onClick={() => { setW(P ? [...DEF_W] : [...DEF_SVC_W]); setMsg(''); }}>Reset to default</button><button className="primary" disabled={tot !== 100 || !dirty} onClick={apply}>Apply</button></div></div>
             <span className="wmsg">{msg}</span></div>
           <div className="spanel"><h2>Top 10 · live preview</h2>{lensCos.length ? <><p>How the top 10 would rank with the weights at left. Arrows compare with the current ranking.</p><div id="wprev">{nw.map(([d, f], i) => { const was = cur.indexOf(d.id), mv = was - i; return <div key={d.id} className="prow"><span className="mono">{String(i + 1).padStart(2, '0')}</span><b>{d.name}</b><span className="fn">{f}</span><span className={`mv ${mv > 0 ? 'up' : mv < 0 ? 'dn' : 'eq'}`}>{mv > 0 ? '▲' + mv : mv < 0 ? '▼' + -mv : '—'}</span></div>; })}</div></> : <p>No companies use the {lens} lens yet. Weights are saved for when you {P ? 'add one' : 'switch a company to it on its profile'}.</p>}</div>

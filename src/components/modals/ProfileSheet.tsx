@@ -205,8 +205,8 @@ export function ProfileSheet({ id, preset }: { id: string | null; preset?: Recor
         <div className="pfoot">
           <div className="pcomp" id="pcomp"><span>Profile completeness</span><b className="mono">{comp}%</b><span className="cbar"><i style={{ width: `${comp}%` }} /></span></div>
           <span className="sp" /><span className="mfootl">BIRDNEST · NDIII</span>
-          <button className="sec" onClick={ui.close}>Cancel</button>
-          <button className="primary edit-only" onClick={save} disabled={saving}>{saving ? 'Saving…' : isNew ? 'Add company' : 'Save profile'}</button>
+          <button className="sec" id="pcancel" onClick={ui.close}>Cancel</button>
+          <button className="primary edit-only" id="psave" onClick={save} disabled={saving}>{saving ? 'Saving…' : isNew ? 'Add company' : 'Save profile'}</button>
         </div>
       </div>
     </Modal>
