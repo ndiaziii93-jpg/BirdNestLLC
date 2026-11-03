@@ -8,7 +8,7 @@ export function SignInButton({ denied }: { denied: boolean }) {
     setBusy(true);
     const sb = supabaseBrowser();
     if (denied) await sb.auth.signOut();
-    await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback?next=/` } });
+    await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/auth/callback` } });
   };
   return (
     <button className="primary sibtn" onClick={go} disabled={busy}>
