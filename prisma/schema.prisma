@@ -1,0 +1,94 @@
+// BirdNest Hub · Postgres (Supabase)
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Company {
+  id         String   @id @default(cuid())
+  kind       String   @default("seeking") // seeking | pharma | investor
+  name       String
+  website    String   @default("")
+  city       String   @default("")
+  cdisp      String   @default("") // country as displayed
+  country    String   @default("") // country as named in the world atlas
+  region     String   @default("Americas")
+  lat        Float    @default(0)
+  lon        Float    @default(0)
+  type       String   @default("Drug") // Drug | Device
+  seg        String   @default("Posterior") // Anterior | Posterior
+  ind        String   @default("")
+  asset      String   @default("")
+  phase      String   @default("Preclinical")
+  phaseLabel String   @default("Preclinical")
+  trend      Int      @default(0)
+  dec        String   @default("Watch") // Pursue | Watch | Pass
+  deal       Int      @default(0) // -1 parked, 0..6
+  cat        String   @default("")
+  runway     Int?
+  runwayAsOf DateTime? @db.Date
+  raise      String   @default("")
+  rightsArr  Json     @default("[true,true,true,true,true,true]")
+  own        String   @default("Private")
+  founded    String   @default("")
+  heads      String   @default("")
+  rationale  String   @default("")
+  scores     Json     @default("[3,3,3,3,3,3]")
+  why        Json     @default("[\"\",\"\",\"\",\"\",\"\",\"\"]")
+  svcScores  Json     @default("[3,3,3,3,3]")
+  svcWhy     Json     @default("[\"\",\"\",\"\",\"\",\"\"]")
+  prevFit    Int      @default(60)
+  fit        Int      @default(60)
+  logo       String?
+  appetite   String   @default("")
+  scale      String   @default("")
+  lens       String   @default("partnering") // partnering | services
+  ai         Json?
+  buyBox     Json?
+  sample     Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  notes      Note[]
+  asBuyer    Intro[]  @relation("buyer")
+  asSeller   Intro[]  @relation("seller")
+
+  @@index([kind])
+  @@index([region])
+}
+
+model Note {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  date      DateTime @db.Date
+  type      String   @default("Note") // Call | Meeting | Email | Congress | Note
+  text      String
+  priv      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([companyId, date])
+}
+
+model Intro {
+  id       String   @id @default(cuid())
+  buyerId  String
+  sellerId String
+  buyer    Company  @relation("buyer", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller   Company  @relation("seller", fields: [sellerId], references: [id], onDelete: Cascade)
+  date     DateTime @db.Date
+  status   String   @default("Introduced")
+  note     String   @default("")
+
+  @@unique([buyerId, sellerId])
+}
+
+model Setting {
+  key   String @id
+  value Json
+}
