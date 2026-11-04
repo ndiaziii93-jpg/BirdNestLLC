@@ -3,6 +3,7 @@ import type Anthropic from '@anthropic-ai/sdk';
 import { guard } from '../_guard';
 import { client, hasKey, MODEL, zodOutputFormat } from '@/lib/claude';
 import { ImportResult, parseImportJson } from '@/lib/importer';
+import { pptxToText } from '@/lib/slides';
 import { loadSettings } from '@/lib/repo';
 import { DEALS, DEV_PH, DRUG_PH, MODS, OWNERSHIP, STG10, STG5, TER, DEALS_W } from '@/lib/constants';
 
@@ -13,7 +14,7 @@ const MAX = 4 * 1024 * 1024; // Vercel accepts request bodies up to 4.5 MB
 
 /**
  * Reads one uploaded file and returns company profiles for the review screen. Nothing is saved here.
- * JSON in the BirdNest import format is read directly; Word, PDF, Markdown and text go through Claude.
+ * JSON in the BirdNest import format is read directly; PowerPoint, Word, PDF, Markdown and text go through Claude.
  */
 export async function POST(req: Request) {
   const g = await guard(); if (g) return g;
@@ -36,12 +37,16 @@ export async function POST(req: Request) {
     const mammoth = await import('mammoth');
     const { value } = await mammoth.extractRawText({ buffer: buf });
     content = { type: 'text', text: `<document name="${name}">\n${value}\n</document>` };
+  } else if (ext === 'pptx') {
+    let deck: string;
+    try { deck = await pptxToText(buf); } catch (e) { return NextResponse.json({ error: 'Could not read the slides (' + (e instanceof Error ? e.message : String(e)) + '). Save the deck as .pptx or PDF and try again.' }, { status: 422 }); }
+    content = { type: 'text', text: `<document name="${name}" kind="slide deck">\n${deck}\n</document>` };
   } else if (['md', 'markdown', 'txt', 'text'].includes(ext)) content = { type: 'text', text: `<document name="${name}">\n${buf.toString('utf8')}\n</document>` };
-  else return NextResponse.json({ error: `Can't read .${ext} files. Use Word (.docx), PDF, Markdown (.md), text or BirdNest JSON.` }, { status: 415 });
+  else return NextResponse.json({ error: `Can't read .${ext} files. Use PowerPoint (.pptx), Word (.docx), PDF, Markdown (.md), text or BirdNest JSON.` }, { status: 415 });
 
   if (!hasKey()) return NextResponse.json({ error: 'ANTHROPIC_API_KEY is not set on the server, so documents cannot be read. BirdNest JSON files still import.' }, { status: 503 });
   const s = await loadSettings();
-  const instruction = `Extract every company profiled in the document above into BirdNest profiles for an ophthalmology BD executive.
+  const instruction = `Extract every company profiled in the document above into BirdNest profiles for an ophthalmology BD executive. A slide deck may hold one company per slide plus overview, contact and next-step slides: combine everything the deck says about each company into one profile (for example contacts from a next-steps table, or a stage from an overview table), and treat a "to confirm" or open-questions list as one dated Note.
 
 Rules:
 - Use only what the document states. Do not add outside knowledge. Use null (or an empty list) for anything not stated.

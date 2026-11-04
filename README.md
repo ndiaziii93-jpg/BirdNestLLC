@@ -21,7 +21,7 @@ The approved design lives in [`design/`](design/) (the HTML prototype and screen
 
 Present mode (top bar) hides private notes and every edit control so the screen can be shown to others.
 
-**Import profiles** (Settings → Data, the Companies page, or the empty dashboard) brings in company profiles written elsewhere: Word, PDF, Markdown or BirdNest JSON. Claude reads documents into BirdNest fields, you review every company before it is saved, and an existing company is updated rather than duplicated. Format, merge rules and a prompt for Claude in another workspace: [`docs/import-format.md`](docs/import-format.md). The seven companies from the Senju review are ready to import in [`docs/examples/senju-review-7.json`](docs/examples/senju-review-7.json).
+**Import profiles** (Settings → Data, the Companies page, or the empty dashboard) brings in company profiles written elsewhere: PowerPoint decks, Word, PDF, Markdown or BirdNest JSON. Claude reads documents into BirdNest fields, you review every company before it is saved, and an existing company is updated rather than duplicated. Format, merge rules and a prompt for Claude in another workspace: [`docs/import-format.md`](docs/import-format.md). The seven companies from the Senju review are ready to import in [`docs/examples/senju-review-7.json`](docs/examples/senju-review-7.json).
 
 ## Run it locally
 

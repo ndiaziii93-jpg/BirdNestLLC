@@ -76,3 +76,11 @@ test('imports the seven Senju review companies and leaves sample records alone',
   // "Vantage" did not merge into the sample company "Vantage Therapeutics"
   expect(data.companies.find((c: { name: string }) => c.name === 'Vantage Therapeutics').sample).toBe(true);
 });
+
+test('accepts PowerPoint decks and explains a deck it cannot open', async ({ page }) => {
+  await openImport(page);
+  await page.locator('#import-files').setInputFiles([fx('deck.pptx'), fx('broken.pptx')]);
+  // The test server has no Anthropic key: a readable deck gets past the file check and stops at the key.
+  await expect(page.locator('.ifile', { hasText: 'deck.pptx' }).first()).toContainText(/ANTHROPIC_API_KEY is not set|compan/);
+  await expect(page.locator('.ifile', { hasText: 'broken.pptx' })).toContainText('Could not read the slides');
+});

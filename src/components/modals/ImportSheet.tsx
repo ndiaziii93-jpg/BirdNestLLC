@@ -11,7 +11,7 @@ import type { Company } from '@/lib/types';
 type FileRow = { key: string; name: string; status: 'reading' | 'done' | 'error'; message: string; count: number; cda: string | null };
 type Row = { key: string; file: string; include: boolean; open: boolean; d: Draft };
 
-const ACCEPT = '.docx,.pdf,.md,.markdown,.txt,.json';
+const ACCEPT = '.pptx,.docx,.pdf,.md,.markdown,.txt,.json';
 const steps = ['Add files', 'Review', 'Done'];
 const FIELDS: [keyof Draft, string][] = [['city', 'HQ city'], ['country', 'Country'], ['own', 'Ownership'], ['founded', 'Founded'], ['ind', 'Lead indication'], ['asset', 'Lead asset'], ['phase', 'Stage'], ['cat', 'Next catalyst'], ['raise', 'Last raise'], ['seeking', 'Seeking'], ['website', 'Website'], ['heads', 'Headcount']];
 
@@ -102,11 +102,11 @@ export function ImportSheet() {
     body = (
       <div className="aq imp">
         <h2>Import company profiles</h2>
-        <p>Add the profiles you have written elsewhere. Claude reads each document and fills the BirdNest fields; you review every company before anything is saved. A company that already exists is updated, never duplicated.</p>
+        <p>Add the profiles, decks and notes you have written elsewhere. Claude reads each document and fills the BirdNest fields; you review every company before anything is saved. A company that already exists is updated, never duplicated.</p>
         <label className={`idrop ${drag ? 'over' : ''}`} onDragOver={e => { e.preventDefault(); setDrag(true); }} onDragLeave={() => setDrag(false)} onDrop={e => { e.preventDefault(); setDrag(false); readFiles(e.dataTransfer.files); }}>
           <input ref={inp} id="import-files" type="file" multiple accept={ACCEPT} onChange={e => { if (e.target.files) readFiles(e.target.files); e.target.value = ''; }} />
           <b>Drop files here or choose files</b>
-          <span>Word (.docx), PDF, Markdown, text, or BirdNest JSON · up to 4 MB each · one or many companies per file</span>
+          <span>PowerPoint (.pptx), Word (.docx), PDF, Markdown, text, or BirdNest JSON · up to 4 MB each · one or many companies per file</span>
         </label>
         {files.length ? (
           <div className="ifiles">{files.map(f => (
