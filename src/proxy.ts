@@ -30,7 +30,9 @@ export async function proxy(req: NextRequest) {
   if (path.startsWith('/api/')) return NextResponse.json({ error: 'Sign in required' }, { status: 401 });
   const to = req.nextUrl.clone();
   to.pathname = '/signin';
-  to.search = email ? '?denied=1' : '';
+  // Supabase reports some sign-in failures as ?error=…&error_description=… on the site URL: carry them to the sign-in page.
+  const desc = req.nextUrl.searchParams.get('error_description') || req.nextUrl.searchParams.get('error');
+  to.search = email ? '?denied=1' : desc ? '?error=' + encodeURIComponent(desc) : '';
   return NextResponse.redirect(to);
 }
 

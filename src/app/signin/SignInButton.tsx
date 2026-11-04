@@ -1,10 +1,17 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { supabaseBrowser } from '@/lib/supabase/client';
 
 export function SignInButton({ denied }: { denied: boolean }) {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
+  // Errors that arrive after the # in the address (Supabase's implicit-flow style) never reach the server.
+  useEffect(() => {
+    const h = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+    const m = h.get('error_description') || h.get('error');
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (m) setErr(m.replace(/\+/g, ' '));
+  }, []);
   const go = async () => {
     setBusy(true);
     const sb = supabaseBrowser();
