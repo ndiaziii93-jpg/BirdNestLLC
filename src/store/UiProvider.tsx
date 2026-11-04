@@ -9,6 +9,7 @@ export type Modal =
   | { kind: 'matrix'; id: string; hl: string | null }
   | { kind: 'export'; id: string }
   | { kind: 'add' }
+  | { kind: 'import' }
   | { kind: 'list' };
 
 interface Ui {

@@ -36,7 +36,7 @@ export function CompaniesView() {
 
   return (
     <section className="vw" id="v-companies">
-      <ViewHead title="Companies" sub={`${rows.length} of ${companies.length} · ${hasSample ? 'sample data · ' : ''}as of ${fmtDate(today)}`} act={<><button className="sec" onClick={() => downloadText(companiesCsv(rows, today), 'birdnest-companies.csv')}>Export CSV</button><button className="sec edit-only" onClick={() => ui.open({ kind: 'add' })}>Add company</button></>} />
+      <ViewHead title="Companies" sub={`${rows.length} of ${companies.length} · ${hasSample ? 'sample data · ' : ''}as of ${fmtDate(today)}`} act={<><button className="sec" onClick={() => downloadText(companiesCsv(rows, today), 'birdnest-companies.csv')}>Export CSV</button><button className="sec edit-only" onClick={() => ui.open({ kind: 'import' })}>Import</button><button className="sec edit-only" onClick={() => ui.open({ kind: 'add' })}>Add company</button></>} />
       <div className="vbar">
         <label className="vsearch"><SearchIcon /><input value={q} placeholder="Filter by company, asset, city, indication" aria-label="Filter companies" onChange={e => setQ(e.target.value)} /></label>
         <Seg opts={[['All', 'All', base.length], ...(['Pursue', 'Watch', 'Pass'] as const).map(x => [x, x, base.filter(d => d.dec === x).length] as [string, string, number])]} cur={dec} onPick={setDec} />

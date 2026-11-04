@@ -1,0 +1,5 @@
+{ "companies": [
+  { "name": "Foventa", "country": "United Kingdom", "ind": "NPDR/DR", "asset": "FV-1 · NPDR · topical drop", "phase": "Phase 1", "cat": "Phase 2 start · Q2 2027",
+    "notes": [{ "date": "2026-10-30", "type": "Call", "text": "Intro call with the CEO.", "private": false }] },
+  { "name": "Arctic Bio", "country": "Norway", "asset": "Biologic · neuroprotective" }
+] }

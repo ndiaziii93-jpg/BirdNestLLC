@@ -6,6 +6,7 @@ import { MatrixSheet } from './MatrixSheet';
 import { ExportSheet } from './ExportSheet';
 import { AddSheet } from './AddSheet';
 import { ListSheet } from './ListSheet';
+import { ImportSheet } from './ImportSheet';
 
 export function ModalHost() {
   const { modals } = useUi();
@@ -21,6 +22,7 @@ export function ModalHost() {
           case 'export': return <ExportSheet key={key} id={m.id} />;
           case 'add': return <AddSheet key={key} />;
           case 'list': return <ListSheet key={key} />;
+          case 'import': return <ImportSheet key={key} />;
         }
       })}
     </>
