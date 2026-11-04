@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { guard } from '../_guard';
-import { Research, hasKey, searchAndAnswer, structure, textOf } from '@/lib/claude';
+import { Research, confidenceMap, hasKey, searchAndAnswer, structure, textOf } from '@/lib/claude';
 import { loadSettings } from '@/lib/repo';
 import { DEV_PH, DRUG_PH, MODS, OWNERSHIP, STG5, TER, DEALS_W } from '@/lib/constants';
 
@@ -19,8 +19,8 @@ export async function POST(req: Request) {
   try {
     const msg = await searchAndAnswer(SYSTEM, prompt);
     if (msg.stop_reason === 'refusal') return NextResponse.json({ error: 'Claude declined this request.' }, { status: 422 });
-    const r = await structure(Research, 'Structure the research below into the schema exactly. Use null for unknown values. Keep confidence keys matching the field names.', textOf(msg));
-    return NextResponse.json(r);
+    const r = await structure(Research, 'Structure the research below into the schema exactly. Use null for unknown values. Give one confidence entry per field, using the field names of the schema.', textOf(msg));
+    return NextResponse.json(confidenceMap(r));
   } catch (e) {
     const m = e instanceof Error ? e.message : String(e);
     return NextResponse.json({ error: 'Claude research did not complete (' + m + ').' }, { status: 502 });

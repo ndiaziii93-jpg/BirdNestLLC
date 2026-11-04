@@ -1,0 +1,25 @@
+{
+  "companies": [
+    { "name": "Sunregen", "kind": "seeking", "city": "Basel", "country": "Switzerland", "type": "Drug", "seg": "Posterior", "ind": "IRDs",
+      "asset": "Oral · non-gene-specific retinitis pigmentosa", "dealStage": "Identified", "lowConfidence": ["asset"],
+      "notes": [{ "date": null, "type": "Note", "text": "Added for the Senju asset review. Route read as oral from \"Ora\" in my notes; confirm.", "private": false }] },
+    { "name": "SeaBeLife Bio", "kind": "seeking", "country": "France", "type": "Drug", "seg": "Posterior",
+      "asset": "Intravitreal · AMD (wet or dry to confirm)", "dealStage": "Identified", "lowConfidence": ["ind"],
+      "notes": [{ "date": null, "type": "Note", "text": "Added for the Senju asset review. Confirm wet or dry AMD.", "private": false }] },
+    { "name": "Authera", "kind": "seeking", "city": "Oslo", "country": "Norway", "type": "Drug", "seg": "Posterior", "ind": "NPDR/DR",
+      "asset": "Biologic · subretinal · NPDR", "dealStage": "Identified",
+      "notes": [{ "date": null, "type": "Note", "text": "Added for the Senju asset review. Confirm subretinal route for NPDR.", "private": false }] },
+    { "name": "D-Sight", "kind": "seeking", "city": "Barcelona", "country": "Spain", "type": "Drug", "seg": "Posterior", "ind": "NPDR/DR",
+      "asset": "Oral neuroprotective · NPDR and glaucoma", "dealStage": "Identified",
+      "notes": [{ "date": null, "type": "Note", "text": "Added for the Senju asset review. Second indication: glaucoma.", "private": false }] },
+    { "name": "Arctic Bio", "kind": "seeking", "country": "Norway", "type": "Drug", "seg": "Posterior",
+      "asset": "Biologic · neuroprotective · indication not stated", "dealStage": "Identified", "lowConfidence": ["seg"],
+      "notes": [{ "date": null, "type": "Note", "text": "Added for the Senju asset review. Indication and route to confirm.", "private": false }] },
+    { "name": "Vantage", "kind": "seeking", "country": "United Kingdom", "type": "Drug", "seg": "Posterior", "ind": "NPDR/DR",
+      "asset": "Oral · NPDR", "phase": "Phase 2 · Phase 3 starting soon", "cat": "Phase 3 start · date to confirm", "dealStage": "Identified", "lowConfidence": ["phase"],
+      "notes": [{ "date": null, "type": "Note", "text": "Added for the Senju asset review. Phase 3 said to start soon.", "private": false }] },
+    { "name": "Foventa", "kind": "seeking", "country": "United Kingdom", "type": "Drug", "seg": "Posterior", "ind": "NPDR/DR",
+      "asset": "Topical eye drop · NPDR", "phase": "Phase 1 · Phase 2 approaching", "cat": "Phase 2 start · date to confirm", "dealStage": "Identified", "lowConfidence": ["phase"],
+      "notes": [{ "date": null, "type": "Note", "text": "Added for the Senju asset review. Phase 2 said to be approaching.", "private": false }] }
+  ]
+}

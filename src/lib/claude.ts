@@ -42,11 +42,15 @@ export const Research = z.object({
     money: z.array(z.object({ label: z.string(), value: z.string() })),
     contact: z.string().nullable(),
   }).nullable(),
-  confidence: z.record(z.string(), z.enum(['high', 'medium', 'low'])),
+  // Structured outputs need fixed object keys, so confidence comes back as a list and is turned into a map in the route.
+  confidence: z.array(z.object({ field: z.string(), level: z.enum(['high', 'medium', 'low']) })),
   sources: z.array(z.string()),
   questions: z.array(z.string()),
 });
-export type ResearchT = z.infer<typeof Research>;
+export type ResearchRaw = z.infer<typeof Research>;
+/** Research as the client receives it: confidence keyed by field name. */
+export type ResearchT = Omit<ResearchRaw, 'confidence'> & { confidence: Record<string, 'high' | 'medium' | 'low'> };
+export const confidenceMap = (r: ResearchRaw): ResearchT => ({ ...r, confidence: Object.fromEntries((r.confidence || []).map(c => [c.field, c.level])) });
 
 export const Assessment = z.object({
   scores: z.array(z.number()),
