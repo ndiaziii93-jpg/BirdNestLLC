@@ -6,12 +6,13 @@ BirdNest imports company profiles from documents you have written elsewhere: in 
 
 | File | How it is read |
 |---|---|
+| PowerPoint `.pptx` | Slide text, tables and speaker notes are extracted in slide order, then Claude combines everything about each company into one profile |
 | Word `.docx` | Text is extracted, then Claude maps it to BirdNest fields |
 | PDF `.pdf` | Sent to Claude as a document |
 | Markdown `.md`, text `.txt` | Sent to Claude as text |
 | BirdNest JSON `.json` | Read directly, no Claude call (the format below) |
 
-Each file can hold one company or many. Files must be under 4 MB.
+Each file can hold one company or many. Files must be under 4 MB; for a large deck, delete images or save it as PDF. Older `.ppt` and `.doc` files need saving as `.pptx` or `.docx` first.
 
 ## What happens on import
 

@@ -1,0 +1,120 @@
+{
+  "companies": [
+    {
+      "name": "Sunregen", "kind": "seeking", "city": "Allschwil (Basel area)", "country": "Switzerland", "region": "Europe",
+      "type": "Drug", "seg": "Posterior", "ind": "IRDs",
+      "asset": "SBC003 (tripentadecanoin) · retinitis pigmentosa, non-gene-specific · oral small molecule",
+      "phase": "Preclinical · IND application stage", "cat": "Phase 1 start · H2 2027",
+      "raise": "Raising now · last closed CHF 1.33M placement, Dec 2024", "seeking": "Open to all investors (per notes)",
+      "dealStage": "Identified", "rightsOpen": ["US", "EU", "UK", "JP", "CN", "RoW"],
+      "overview": "SunRegen Healthcare AG, based in Allschwil near Basel, is developing SBC003, an oral small molecule for retinitis pigmentosa that is not gene-specific. Patents are granted in Japan and China.",
+      "pipeline": [{ "code": "SBC003", "description": "Retinitis pigmentosa · oral", "stage": "IND-enabling", "catalyst": "Phase 1 start · H2 2027" }],
+      "contacts": [{ "name": "Yuhong Dong", "role": "Co-founder" }, { "name": "David Guan", "role": "Co-founder" }],
+      "notes": [{ "date": "2026-11-04", "type": "Note", "text": "Senju asset review. To confirm: size and terms of the current raise; runway to Phase 1; IND route (Swiss filing Jul 2025, FDA, or both); non-gene-specific data across RP genotypes; Japan patent scope and Japan rights appetite.", "private": false }],
+      "lowConfidence": ["cat", "rightsOpen"],
+      "sources": ["HKTDC project listing, 20 Nov 2025", "Verisante Technology release, 18 Dec 2024", "Patsnap Synapse drug record", "BaselArea, 2019"]
+    },
+    {
+      "name": "SeaBeLife", "kind": "seeking", "city": "Roscoff", "country": "France", "region": "Europe",
+      "type": "Drug", "seg": "Posterior", "ind": "GA",
+      "asset": "SBL03 · dry AMD / geographic atrophy · topical gel, small-molecule necroptosis and ferroptosis inhibitor",
+      "phase": "Preclinical · regulatory preclinical studies from 2025", "cat": "First clinical trial · 2026",
+      "raise": "Raising Series A now · last €2M pre-Series A, Oct 2025 (iXLife)", "seeking": "Open to any investor (per notes)",
+      "dealStage": "Identified", "rightsOpen": ["US", "EU", "UK", "JP", "CN", "RoW"],
+      "overview": "SeaBeLife SAS, in Roscoff, is developing SBL03, a small molecule that blocks two cell-death pathways, as a topical gel for dry AMD and geographic atrophy. It is raising a Series A ahead of a first clinical trial planned for 2026.",
+      "pipeline": [{ "code": "SBL03", "description": "Dry AMD / GA · topical gel", "stage": "Preclinical", "catalyst": "First clinical trial · 2026" }],
+      "contacts": [{ "name": "Morgane Rousselet", "role": "Contact" }],
+      "notes": [{ "date": "2026-11-04", "type": "Note", "text": "Senju asset review. To confirm: Series A size, timing and lead; runway; first-in-human timing and country; role of the intravitreal formulation; fit with Senju's topical franchise and Japan rights.", "private": false }],
+      "lowConfidence": ["rightsOpen"],
+      "sources": ["Ophthalmology Times, 1 Feb 2025", "tech.eu, 22 Apr 2024", "Manufacturing Chemist, 3 Oct 2025"]
+    },
+    {
+      "name": "Authera", "kind": "seeking", "city": "Oslo", "country": "Norway", "region": "Europe",
+      "type": "Drug", "seg": "Posterior", "ind": "NPDR/DR",
+      "asset": "AuT-1 · NPDR, DME, wet AMD and RVO explored · intravitreal antibody-based biologic",
+      "phase": "Preclinical · moving to late preclinical", "cat": "First clinical study · 2028", "runwayMonths": 12,
+      "raise": "Research Council of Norway grant, Nov 2025 · amount not stated", "seeking": "Open to any investor (per notes)",
+      "dealStage": "Identified", "rightsOpen": ["US", "EU", "UK", "JP", "CN", "RoW"],
+      "overview": "Authera AS, in Oslo, is developing AuT-1, an antibody-based biologic from an FcRn-engineering platform, as an intravitreal treatment. It is exploring NPDR, DME, wet AMD and RVO and plans a first clinical study in 2028.",
+      "pipeline": [{ "code": "AuT-1", "description": "Retinal vascular disease · intravitreal", "stage": "Preclinical", "catalyst": "First clinical study · 2028" }],
+      "contacts": [{ "name": "Simone Mester", "role": "CEO" }],
+      "notes": [{ "date": "2026-11-04", "type": "Note", "text": "Senju asset review. Runway 12+ months (per notes). To confirm: which indication leads; grant amount and timing of the next equity raise; where FcRn-engineered biologics fit Senju's pipeline; Japan or APAC rights interest.", "private": false }],
+      "lowConfidence": ["ind", "runwayMonths", "rightsOpen"],
+      "sources": ["Nordic Life Science, 12 Nov 2025", "Authera release via Inven2, 20 Mar 2023"]
+    },
+    {
+      "name": "D-Sight", "kind": "seeking", "city": "Barcelona", "country": "Spain", "region": "Europe",
+      "type": "Drug", "seg": "Posterior", "ind": "NPDR/DR",
+      "asset": "Topical ocular sitagliptin · early DR / NPDR; glaucoma preclinical · neuroprotective eye drop",
+      "phase": "Phase 1 · first-in-human, healthy volunteers", "cat": "Phase 2 start · 2027", "runwayMonths": 12,
+      "raise": "~€2M public and private, Feb 2026, led by Clave Capital · ~€5M total invested", "seeking": "Open to any investor (per notes)",
+      "dealStage": "Identified", "rightsOpen": ["US", "EU", "UK", "JP", "CN", "RoW"],
+      "overview": "D-Sight, a Vall d'Hebron spin-off in Barcelona, is developing a neuroprotective sitagliptin eye drop for early diabetic retinopathy, with glaucoma in preclinical work. Its Phase 1 in healthy volunteers is due to complete in 2026.",
+      "pipeline": [
+        { "code": "Sitagliptin drop", "description": "Early DR / NPDR · eye drop", "stage": "Phase 1", "catalyst": "Phase 2 start · 2027" },
+        { "code": "Sitagliptin drop", "description": "Glaucoma · eye drop", "stage": "Preclinical", "catalyst": null }
+      ],
+      "contacts": [{ "name": "Agostino Romeo", "role": "Business development" }],
+      "notes": [{ "date": "2026-11-04", "type": "Note", "text": "Senju asset review. Runway 12+ months (per notes). To confirm: Phase 1 readout timing; Phase 2 design, size and geography; Series A size and timing; glaucoma programme timeline; Japan or APAC rights interest.", "private": false }],
+      "lowConfidence": ["runwayMonths", "rightsOpen"],
+      "sources": ["VHIR news, 23 Feb 2026", "Vall d'Hebron, 2 May 2023"]
+    },
+    {
+      "name": "Arctic Bio", "kind": "seeking", "country": "Norway", "region": "Europe",
+      "type": "Drug", "seg": "Anterior", "ind": "Glaucoma/OHT",
+      "asset": "ABS403 · glaucoma, neuroprotective · intravitreal biologic (per notes)",
+      "phase": "Preclinical (per notes) · clinical pilot in POAG reported publicly", "cat": "IND-enabling start · date not stated",
+      "raise": "NOK 15M bank loan, Apr 2026 (debt, not equity)", "seeking": "Open to any investor; seeking partners",
+      "dealStage": "Identified", "rightsOpen": ["US", "EU", "UK", "JP", "CN", "RoW"],
+      "overview": "Arctic Bioscience AS, in Norway, is developing ABS403 as a neuroprotective treatment for glaucoma and has said it is seeking partners. Its stated stage needs reconciling with a publicly reported pilot study in POAG.",
+      "pipeline": [{ "code": "ABS403", "description": "Glaucoma · neuroprotective", "stage": "Preclinical", "catalyst": "IND-enabling start" }],
+      "contacts": [{ "name": "Runhild Gammelsæter", "role": "Medical Director" }],
+      "notes": [{ "date": "2026-11-04", "type": "Note", "text": "Senju asset review. To confirm: reconcile the public pilot study with a preclinical stage; how an intravitreal biologic fits the marine-compound platform; runway and equity plans; IND-enabling start date; Japan or APAC rights interest.", "private": false }],
+      "lowConfidence": ["phase", "asset", "city", "rightsOpen"],
+      "sources": ["Arctic Bioscience release, 29 Jan 2026", "Arctic Bioscience release, 1 Apr 2026"]
+    },
+    {
+      "name": "Vantage", "kind": "seeking", "city": "London", "country": "United Kingdom", "region": "Europe",
+      "type": "Drug", "seg": "Posterior", "ind": "NPDR/DR",
+      "asset": "Oruvestat (VX-01) · moderate to severe NPDR · oral selective AOC3 inhibitor",
+      "phase": "Phase 2 SeeClear · enrolment complete Aug 2026", "cat": "Phase 2 topline · Q4 2027", "runwayMonths": 12,
+      "seeking": "Prefers a pharma partner or acquirer (per notes)", "timing": "Phase 3 to start before Phase 2 topline (per notes)",
+      "dealStage": "Identified", "rightsOpen": ["US", "EU", "UK", "JP", "CN", "RoW"],
+      "overview": "Vantage Biosciences, in London, is developing oruvestat, an oral AOC3 inhibitor for moderate to severe NPDR. Its Phase 2 SeeClear study completed enrolment in August 2026 across 26 sites in the US, Australia and South-East Asia, with topline due Q4 2027.",
+      "pipeline": [{ "code": "VX-01", "description": "Moderate to severe NPDR · oral", "stage": "Phase 2", "catalyst": "Topline · Q4 2027" }],
+      "contacts": [{ "name": "Andre Badalyan", "role": "Co-founder" }],
+      "notes": [{ "date": "2026-11-04", "type": "Note", "text": "Senju asset review. Runway 12+ months (per notes). To confirm: Phase 3 start date, size and geography; whether Japan is in the Phase 3 footprint; last raise amount and date; licence or acquisition preferred; Japan or APAC rights interest.", "private": false }],
+      "lowConfidence": ["runwayMonths", "rightsOpen"],
+      "sources": ["Vantage Biosciences release via BioSpace, 4 Aug 2026", "ClinicalTrials.gov NCT06770933"]
+    },
+    {
+      "name": "Foventa", "kind": "seeking", "city": "Cambridge", "country": "United Kingdom", "region": "Europe",
+      "type": "Drug", "seg": "Posterior", "ind": "NPDR/DR",
+      "asset": "FOV407 · NPDR · topical eye drop, small-molecule SRPK1 inhibitor (VEGF pathway)",
+      "phase": "Phase 2a completed (1b/2a) · Phase 2b in preparation", "cat": "Phase 2b start · 2027", "runwayMonths": 12,
+      "raise": "Raising Series A now · £9M total raised as Exonate by Jan 2019", "seeking": "Series A now; sell or license after Phase 2b (per notes)",
+      "timing": "US-only or global Phase 2b, decision pending",
+      "dealStage": "Identified", "rightsOpen": ["US", "EU", "UK", "JP", "CN", "RoW"],
+      "overview": "Foventa Therapeutics, formerly Exonate, in Cambridge, is developing FOV407, a topical SRPK1-inhibitor eye drop for NPDR. It has completed a Phase 1b/2a study and is preparing Phase 2b while raising a Series A.",
+      "pipeline": [{ "code": "FOV407", "description": "NPDR · topical eye drop", "stage": "Phase 2", "catalyst": "Phase 2b start · 2027" }],
+      "contacts": [{ "name": "Zaiba Malik", "role": "CMO" }, { "name": "Julia Jones", "role": "CFO" }],
+      "notes": [{ "date": "2026-11-04", "type": "Note", "text": "Senju asset review. Runway 12+ months (per notes). To confirm: Series A size and lead investor; when the US-only or global Phase 2b decision is made; whether Japan would join a global Phase 2b; Japan or APAC rights interest.", "private": false }],
+      "lowConfidence": ["runwayMonths", "rightsOpen"],
+      "sources": ["Foventa releases, 1 and 2 Sep 2026", "MedNous, 5 Jan 2019"]
+    },
+    {
+      "name": "Ageless Bio", "kind": "seeking", "city": "Brussels", "country": "Belgium", "region": "Europe",
+      "type": "Drug", "seg": "Anterior", "ind": "Presbyopia",
+      "asset": "UNR844 (lipoic acid choline ester) · presbyopia · small-molecule antioxidant eye drop, acquired from Novartis",
+      "phase": "Phase 2 completed by Novartis (2022) · reformulating", "cat": "New formulation · timing not stated",
+      "raise": "Seeking capital now (per notes)", "seeking": "Open to any investor (per notes)",
+      "dealStage": "Identified", "rightsOpen": ["US", "EU", "UK", "JP", "CN", "RoW"],
+      "overview": "Ageless Bio, in Brussels, holds global rights to UNR844, a presbyopia eye drop acquired from Novartis after Novartis discontinued it in 2022 following Phase 2. It is reformulating the drop and raising capital.",
+      "pipeline": [{ "code": "UNR844", "description": "Presbyopia · eye drop", "stage": "Phase 2", "catalyst": "New formulation" }],
+      "contacts": [{ "name": "Charles Margarit", "role": "Founder" }],
+      "notes": [{ "date": "2026-11-04", "type": "Note", "text": "Senju asset review. Novartis Phase 2 included Japanese sites. To confirm: why Novartis stopped and what the new formulation fixes; access to Novartis Phase 2 data, including Japan; raise size and runway; reformulation timeline to the next clinical study; Japan or APAC rights interest.", "private": false }],
+      "lowConfidence": ["rightsOpen"],
+      "sources": ["AdisInsight drug profile, UNR844", "ClinicalTrials.gov NCT04806503"]
+    }
+  ]
+}
