@@ -84,3 +84,34 @@ test('accepts PowerPoint decks and explains a deck it cannot open', async ({ pag
   await expect(page.locator('.ifile', { hasText: 'deck.pptx' }).first()).toContainText(/ANTHROPIC_API_KEY is not set|compan/);
   await expect(page.locator('.ifile', { hasText: 'broken.pptx' })).toContainText('Could not read the slides');
 });
+
+test('a failed save is reported with its reason, not counted, and can be retried', async ({ page }) => {
+  // Make the server refuse SeaBeLife once.
+  let refused = false;
+  await page.route('**/api/companies', async route => {
+    const body = route.request().postData() || '';
+    if (!refused && body.includes('"name":"SeaBeLife Bio"')) { refused = true; return route.fulfill({ status: 500, contentType: 'application/json', body: JSON.stringify({ error: 'P2028: Transaction already closed' }) }); }
+    return route.continue();
+  });
+  await openImport(page);
+  await page.locator('#import-files').setInputFiles(path.join(__dirname, '..', '..', 'docs', 'examples', 'senju-review-7.json'));
+  await page.locator('.afoot .primary', { hasText: 'Review 7 companies' }).click();
+  await page.locator('.afoot .primary', { hasText: 'Import 7 companies' }).click();
+  await expect(page.locator('#isheet h2')).toHaveText('Imported 6 of 7 companies');
+  await expect(page.locator('.ifail .ifile')).toContainText('SeaBeLife Bio');
+  await expect(page.locator('.ifail .ifile')).toContainText('P2028: Transaction already closed');
+  let data = await (await page.request.get('/api/dataset')).json();
+  expect(data.companies.some((c: { name: string }) => c.name === 'SeaBeLife Bio')).toBe(false);
+  await page.locator('.afoot .sec', { hasText: 'Retry 1 not saved' }).click();
+  await expect(page.locator('#isheet h2')).toHaveText('Imported 7 companies');
+  data = await (await page.request.get('/api/dataset')).json();
+  expect(data.companies.filter((c: { name: string }) => c.name === 'SeaBeLife Bio')).toHaveLength(1);
+});
+
+test('the server returns the reason when a save fails', async ({ request }) => {
+  const r = await request.post('/api/companies', { data: { id: 'bad-1', name: 'Broken', notes: [{ id: 'n1', date: 'not-a-date', type: 'Note', text: 'x', priv: false }] } });
+  expect(r.status()).toBe(500);
+  const j = await r.json();
+  expect(typeof j.error).toBe('string');
+  expect(j.error.length).toBeGreaterThan(5);
+});

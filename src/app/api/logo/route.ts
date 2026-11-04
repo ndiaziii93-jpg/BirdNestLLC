@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
-import { guard } from '../_guard';
+import { guard, handle } from '../_guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,7 +9,7 @@ export const dynamic = 'force-dynamic';
  * Body: { companyId, dataUrl } (an uploaded image) or { companyId, url } (a fetched favicon to copy).
  * Falls back to returning the data URL unchanged when storage is not configured.
  */
-export async function POST(req: Request) {
+export const POST = handle(async (req: Request) => {
   const g = await guard(); if (g) return g;
   const { companyId, dataUrl, url } = (await req.json()) as { companyId: string; dataUrl?: string; url?: string };
   if (!companyId) return NextResponse.json({ error: 'companyId required' }, { status: 400 });
@@ -39,4 +39,4 @@ export async function POST(req: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   const { data } = sb.storage.from(bucket).getPublicUrl(path);
   return NextResponse.json({ logo: data.publicUrl });
-}
+});
