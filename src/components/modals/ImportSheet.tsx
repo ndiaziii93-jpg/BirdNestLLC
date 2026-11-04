@@ -24,6 +24,7 @@ export function ImportSheet() {
   const [busy, setBusy] = useState(false);
   const [drag, setDrag] = useState(false);
   const [saved, setSaved] = useState<{ c: Company; updated: boolean }[]>([]);
+  const [failed, setFailed] = useState<{ d: Draft; why: string }[]>([]);
   const inp = useRef<HTMLInputElement>(null);
 
   const reading = files.some(f => f.status === 'reading');
@@ -53,46 +54,50 @@ export function ImportSheet() {
   const setDraft = (key: string, patch: Partial<Draft>) => setRows(rs => rs.map(r => (r.key === key ? { ...r, d: { ...r.d, ...patch } } : r)));
   const setRow = (key: string, patch: Partial<Row>) => setRows(rs => rs.map(r => (r.key === key ? { ...r, ...patch } : r)));
 
-  const save = async () => {
+  /** Saves the drafts one by one. Each result is recorded, so a failed save is reported, never counted as imported. */
+  const saveDrafts = async (drafts: Draft[]) => {
     setBusy(true);
-    const drafts = included.map(r => r.d);
     const fresh = newIndications(drafts, settings);
     if (fresh.post.length) await setPicklist('post', [...settings.post, ...fresh.post]);
     if (fresh.ant.length) await setPicklist('ant', [...settings.ant, ...fresh.ant]);
     const s2 = { ...settings, post: [...settings.post, ...fresh.post], ant: [...settings.ant, ...fresh.ant] };
     const [{ loadWorld }, d3] = await Promise.all([import('@/lib/world'), import('d3')]);
     const world = await loadWorld().catch(() => []);
-    const out: { c: Company; updated: boolean }[] = [];
+    const ok: { c: Company; updated: boolean }[] = [];
+    const bad: { d: Draft; why: string }[] = [];
     let pool = companies;
+    const CTR = { Americas: [-95, 40], Europe: [10, 50], APAC: [120, 30] } as Record<string, [number, number]>;
     for (const d of drafts) {
       const existing = findMatch(pool, d);
       let lonLat: [number, number] | null = null;
       if (!existing) {
-        const country = (d.country || '').trim();
-        const f = world.find(w => w.properties.name.toLowerCase() === country.toLowerCase());
-        const region = d.region || null;
-        lonLat = f ? (d3.geoCentroid(f) as [number, number]) : region ? ({ Americas: [-95, 40], Europe: [10, 50], APAC: [120, 30] } as Record<string, [number, number]>)[region] : null;
+        const country = (d.country || '').trim().toLowerCase();
+        const f = world.find(w => w.properties.name.toLowerCase() === country);
+        lonLat = f ? (d3.geoCentroid(f) as [number, number]) : d.region ? CTR[d.region] : null;
       }
       const c = applyDraft(existing, d, { settings: s2, today, uid, lonLat });
-      if (!existing && c.lat === 0 && c.lon === 0) {
-        const ctr = ({ Americas: [-95, 40], Europe: [10, 50], APAC: [120, 30] } as Record<string, [number, number]>)[c.region];
-        c.lon = ctr[0] + (Math.random() - 0.5) * 1.5; c.lat = ctr[1] + (Math.random() - 0.5) * 1.5;
-      }
+      if (!existing && c.lat === 0 && c.lon === 0) { const ctr = CTR[c.region]; c.lon = ctr[0] + (Math.random() - 0.5) * 1.5; c.lat = ctr[1] + (Math.random() - 0.5) * 1.5; }
       if (!c.logo && c.website) {
         try {
           const lr = await fetch('/api/logo', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ companyId: c.id, url: `https://www.google.com/s2/favicons?domain=${c.website}&sz=128` }) });
           if (lr.ok) c.logo = (await lr.json()).logo;
         } catch { /* a logo is optional */ }
       }
-      const savedC = await saveCompany(c);
-      out.push({ c: savedC, updated: !!existing });
-      pool = existing ? pool.map(x => (x.id === savedC.id ? savedC : x)) : [...pool, savedC];
+      try {
+        const savedC = await saveCompany(c, { strict: true });
+        ok.push({ c: savedC, updated: !!existing });
+        pool = existing ? pool.map(x => (x.id === savedC.id ? savedC : x)) : [...pool, savedC];
+      } catch (e) {
+        bad.push({ d, why: (e instanceof Error ? e.message : String(e)).replace(/^POST \/api\/companies failed /, '') });
+      }
     }
-    setSaved(out);
-    if (out[0]) ui.setSel(out[0].c.id);
+    setSaved(s => [...s, ...ok]);
+    setFailed(bad);
+    if (ok[0]) ui.setSel(ok[0].c.id);
     setBusy(false);
     setStep(3);
   };
+  const save = () => saveDrafts(included.map(r => r.d));
 
   const matches = useMemo(() => new Map(rows.map(r => [r.key, findMatch(companies, r.d)])), [rows, companies]);
   const cdaFiles = files.filter(f => f.cda);
@@ -159,17 +164,22 @@ export function ImportSheet() {
     );
     foot = <><button className="sec" onClick={() => setStep(1)}>Add more files</button><span className="sp" /><button className="primary" disabled={busy || !included.length} onClick={save}>{busy ? 'Saving…' : `Import ${included.length} ${included.length === 1 ? 'company' : 'companies'}`}</button></>;
   } else {
-    const nNew = saved.filter(s => !s.updated).length, nUpd = saved.length - nNew;
+    const nNew = saved.filter(s => !s.updated).length, nUpd = saved.length - nNew, total = saved.length + failed.length;
     body = (
       <div className="aq imp">
-        <h2>Imported {saved.length} {saved.length === 1 ? 'company' : 'companies'}</h2>
-        <p>{nNew} new · {nUpd} updated. Each profile is open for scoring and tweaks; fit stays at the default until you score it.</p>
-        <div className="ifiles">{saved.map(s => (
+        <h2>{failed.length ? `Imported ${saved.length} of ${total} companies` : `Imported ${saved.length} ${saved.length === 1 ? 'company' : 'companies'}`}</h2>
+        <p>{nNew} new · {nUpd} updated{failed.length ? ` · ${failed.length} not saved` : ''}. Each profile is open for scoring and tweaks; fit stays at the default until you score it.</p>
+        {failed.length ? (
+          <div className="icda" role="alert"><b>{failed.length === 1 ? '1 company was not saved.' : `${failed.length} companies were not saved.`}</b> Nothing was half-written; retry below. If it fails again, send the reason shown to whoever maintains the Hub.
+            <div className="ifiles ifail">{failed.map((f, i) => <div key={i} className="ifile error"><span className="nm">{f.d.name}</span><span className="st">{f.why}</span></div>)}</div>
+          </div>
+        ) : null}
+        {saved.length ? <div className="ifiles">{saved.map(s => (
           <button key={s.c.id} className="ifile done ilink" onClick={() => ui.replace({ kind: 'profile', id: s.c.id })}><span className="nm">{s.c.name}</span><span className="st">{s.updated ? 'Updated' : 'New'} · open profile</span></button>
-        ))}</div>
+        ))}</div> : null}
       </div>
     );
-    foot = <><span className="sp" /><button className="primary" onClick={ui.close}>Done</button></>;
+    foot = <>{failed.length ? <button className="sec" disabled={busy} onClick={() => saveDrafts(failed.map(f => f.d))}>{busy ? 'Retrying…' : `Retry ${failed.length} not saved`}</button> : null}<span className="sp" /><button className="primary" disabled={busy} onClick={ui.close}>Done</button></>;
   }
 
   return (

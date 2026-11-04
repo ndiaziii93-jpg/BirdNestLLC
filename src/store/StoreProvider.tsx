@@ -11,7 +11,12 @@ const uid = () => (typeof crypto !== 'undefined' && 'randomUUID' in crypto ? cry
 
 async function api<T = unknown>(path: string, method: string, body?: unknown): Promise<T> {
   const r = await fetch(path, { method, headers: body ? { 'content-type': 'application/json' } : undefined, body: body ? JSON.stringify(body) : undefined });
-  if (!r.ok) { const t = await r.text().catch(() => ''); throw new Error(`${method} ${path} failed (${r.status}) ${t}`); }
+  if (!r.ok) {
+    const t = await r.text().catch(() => '');
+    let why = t.slice(0, 300);
+    try { const j = JSON.parse(t); if (j && j.error) why = String(j.error); } catch { /* not JSON */ }
+    throw new Error(`${method} ${path} failed (${r.status})${why ? ': ' + why : ''}`);
+  }
   return r.status === 204 ? (undefined as T) : r.json();
 }
 
@@ -23,7 +28,8 @@ export interface Store {
   error: string;
   clearError: () => void;
   byId: (id: string) => Company | undefined;
-  saveCompany: (c: Company) => Promise<Company>;
+  /** Saves a company. With `strict`, a failed save is undone on screen and thrown, so callers can report it. */
+  saveCompany: (c: Company, opts?: { strict?: boolean }) => Promise<Company>;
   deleteCompany: (id: string) => Promise<void>;
   addNote: (companyId: string, n: Omit<Note, 'id'>) => Promise<void>;
   moveStage: (id: string, stage: number) => Promise<void>;
@@ -54,12 +60,20 @@ export function StoreProvider({ initial, children }: { initial: Dataset; childre
     setCompanies(list => (list.some(x => x.id === c.id) ? list.map(x => (x.id === c.id ? c : x)) : [...list, c]));
   }, []);
 
-  const saveCompany = useCallback(async (c: Company) => {
+  const saveCompany = useCallback(async (c: Company, opts?: { strict?: boolean }) => {
     const s = ref.current.settings;
     const fit = calcFit(c, s);
     const next: Company = { ...c, id: c.id || uid(), fit, notes: c.notes.map(n => ({ ...n, id: n.id || uid() })) };
+    const before = ref.current.companies.find(x => x.id === next.id);
     put(next);
-    try { const saved = await api<Company>('/api/companies', 'POST', next); put(saved); return saved; } catch (e) { fail(e); return next; }
+    try { const saved = await api<Company>('/api/companies', 'POST', next); put(saved); return saved; }
+    catch (e) {
+      if (opts?.strict) {
+        if (before) put(before); else setCompanies(list => list.filter(x => x.id !== next.id));
+        throw e;
+      }
+      fail(e); return next;
+    }
   }, [put]);
 
   const deleteCompany = useCallback(async (id: string) => {

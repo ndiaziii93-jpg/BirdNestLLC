@@ -65,15 +65,17 @@ export async function loadDataset(): Promise<Dataset> {
 /** Insert or replace a whole company (fields + notes). */
 export async function upsertCompany(c: Company): Promise<Company> {
   const row = companyToRow(c);
-  const saved = await prisma.$transaction(async tx => {
-    await tx.company.upsert({ where: { id: c.id }, update: row, create: row });
-    await tx.note.deleteMany({ where: { companyId: c.id, id: { notIn: c.notes.map(n => n.id) } } });
-    for (const n of c.notes) {
+  // One batched transaction: the statements go to the database together, so a save through Supabase's
+  // pooler never waits on the interactive-transaction timers that can expire on a serverless cold start.
+  await prisma.$transaction([
+    prisma.company.upsert({ where: { id: c.id }, update: row, create: row }),
+    prisma.note.deleteMany({ where: { companyId: c.id, id: { notIn: c.notes.map(n => n.id) } } }),
+    ...c.notes.map(n => {
       const data = { companyId: c.id, date: new Date(n.date + 'T00:00:00Z'), type: n.type, text: n.text, priv: n.priv };
-      await tx.note.upsert({ where: { id: n.id }, update: data, create: { id: n.id, ...data } });
-    }
-    return tx.company.findUniqueOrThrow({ where: { id: c.id }, include: { notes: { orderBy: { date: 'desc' } } } });
-  });
+      return prisma.note.upsert({ where: { id: n.id }, update: data, create: { id: n.id, ...data } });
+    }),
+  ]);
+  const saved = await prisma.company.findUniqueOrThrow({ where: { id: c.id }, include: { notes: { orderBy: { date: 'desc' } } } });
   return rowToCompany(saved);
 }
 
