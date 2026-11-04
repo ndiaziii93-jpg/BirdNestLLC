@@ -3,7 +3,7 @@
 import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
-const PUBLIC = ['/signin', '/auth/callback', '/auth/signout'];
+const PUBLIC = ['/signin', '/auth/signin', '/auth/callback', '/auth/signout'];
 
 export async function proxy(req: NextRequest) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL, key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
