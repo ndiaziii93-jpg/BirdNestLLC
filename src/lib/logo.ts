@@ -1,9 +1,10 @@
-// Finding a company's logo: read its website, collect the images that look like a logo, let Claude
+// Finding a company's logo: read its live website (through Firecrawl when FIRECRAWL_API_KEY is set), collect the images that look like a logo, let Claude
 // pick the official one (falling back to a simple ranking without a key), and store it.
 import { createClient } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { client, hasKey, MODEL, searchAndAnswer, structure, textOf, zodOutputFormat } from './claude';
 import type Anthropic from '@anthropic-ai/sdk';
+import { DIRECTORY, hasFirecrawl, scrapeSite, searchWeb } from './firecrawl';
 
 export type Kind = 'logo-img' | 'apple-touch-icon' | 'icon' | 'og-image' | 'favicon';
 export interface Candidate { url: string; kind: Kind; alt: string; score: number }
@@ -118,8 +119,21 @@ async function claudePick(name: string, site: string, cands: Fetched[]): Promise
 
 /** The company's website, found with a web search when the profile has none. */
 export async function findWebsite(name: string, city: string, country: string): Promise<string | null> {
+  const where = [city, country].filter(Boolean).join(', ');
+  if (hasFirecrawl()) {
+    const hits = await searchWeb(`${name}${where ? ' ' + where : ''} official website ophthalmology`);
+    const own = hits.filter(h => { try { return !DIRECTORY.test(new URL(h.url).hostname); } catch { return false; } });
+    if (!own.length) return null;
+    if (hasKey()) {
+      try {
+        const r = await structure(z.object({ website: z.string().nullable() }), `Which of these search results is the official website of the company "${name}"${where ? ` (${where})` : ''}? Answer with its address, or null if none is the company's own site.`, own.map((h, i) => `${i + 1}. ${h.url}\n${h.title}\n${h.description}`).join('\n\n'));
+        return siteUrl(r.website);
+      } catch { /* fall back to the first result */ }
+    }
+    return siteUrl(own[0].url);
+  }
   if (!hasKey()) return null;
-  const msg = await searchAndAnswer('You find the official website of companies. Answer with the domain only, or "unknown". Public information only.', `What is the official website of the company "${name}"${city || country ? `, based in ${[city, country].filter(Boolean).join(', ')}` : ''}? It works in ophthalmology, pharma or life-science investing.`, 3);
+  const msg = await searchAndAnswer('You find the official website of companies. Answer with the domain only, or "unknown". Public information only.', `What is the official website of the company "${name}"${where ? `, based in ${where}` : ''}? It works in ophthalmology, pharma or life-science investing.`, 3);
   const r = await structure(z.object({ website: z.string().nullable() }), 'Extract the official website domain of the company from the answer below, or null when unknown.', textOf(msg));
   return siteUrl(r.website);
 }
@@ -138,20 +152,46 @@ export async function storeLogo(companyId: string, bytes: Buffer, type: string):
 
 export interface FindInput { companyId: string; name: string; website?: string | null; city?: string; country?: string; exclude?: string[]; allowPrivate?: boolean }
 export type FindResult =
-  | { ok: true; logo: string; origin: string; website: string; method: 'claude' | 'ranking'; confidence: string; reason: string }
+  | { ok: true; logo: string; origin: string; website: string | null; method: 'claude' | 'ranking' | 'given'; confidence: string; reason: string; via: 'firecrawl' | 'direct' }
   | { ok: false; website: string | null; reason: string };
+
+/** A full address with a path, which might point straight at an image rather than a site. */
+const deepLink = (u: string) => { try { const x = new URL(u); return /^https?:$/.test(x.protocol) && x.pathname.length > 1; } catch { return false; } };
 
 export async function findLogo(input: FindInput): Promise<FindResult> {
   const allowPrivate = !!input.allowPrivate;
-  let site = siteUrl(input.website);
-  if (!site) site = await findWebsite(input.name, input.city || '', input.country || '').catch(() => null);
-  if (!site) return { ok: false, website: null, reason: input.website ? 'The website address is not valid.' : 'No website on the profile, and none was found.' };
+  const given = (input.website || '').trim();
 
-  const page = await get(site, allowPrivate);
-  const base = page?.url || site;
-  const html = page && page.ok && (page.headers.get('content-type') || '').includes('html') ? (await page.text()).slice(0, 2_000_000) : '';
+  // The owner pasted a link straight to the logo image: use it as given.
+  if (deepLink(given)) {
+    const f = await fetchImage({ url: given, kind: 'logo-img', alt: 'Logo link you gave', score: 100 }, allowPrivate);
+    if (f) {
+      const logo = await storeLogo(input.companyId, f.bytes, f.type);
+      return { ok: true, logo, origin: f.url, website: null, method: 'given', confidence: 'high', reason: 'The logo link you gave.', via: 'direct' };
+    }
+  }
+
+  let site = siteUrl(given);
+  if (!site && !given) site = await findWebsite(input.name, input.city || '', input.country || '').catch(() => null);
+  if (!site) return { ok: false, website: null, reason: given ? 'That website address is not valid.' : 'No website on the profile, and none was found online. Enter the company\'s website.' };
+  if (!isPublicUrl(site, allowPrivate)) return { ok: false, website: site, reason: 'That address cannot be used.' };
+  // Read the exact page the owner gave (e.g. a country site); the site's home page otherwise.
+  const page0 = deepLink(given) ? given : site;
+
+  // Read the live page: rendered by Firecrawl when available (it also names the brand logo), else a plain request.
+  let html = '', base = site, via: 'firecrawl' | 'direct' = 'direct';
+  const brand: string[] = [];
+  const fc = hasFirecrawl() ? await scrapeSite(page0) : null;
+  if (fc) { html = fc.html; base = fc.finalUrl; brand.push(...fc.brandLogos); via = 'firecrawl'; }
+  else {
+    const page = await get(page0, allowPrivate);
+    base = page?.url || page0;
+    html = page && page.ok && (page.headers.get('content-type') || '').includes('html') ? (await page.text()).slice(0, 2_000_000) : '';
+  }
   const exclude = new Set(input.exclude || []);
-  const cands = extractCandidates(html, base).filter(c => !exclude.has(c.url));
+  const fromBrand: Candidate[] = brand.map((url, i) => ({ url, kind: 'logo-img' as Kind, alt: 'Brand logo detected on the live page', score: 99 - i }));
+  const seen = new Set(fromBrand.map(c => c.url));
+  const cands = [...fromBrand, ...extractCandidates(html, base).filter(c => !seen.has(c.url))].filter(c => !exclude.has(c.url));
 
   const fetched: Fetched[] = [];
   for (const c of cands) {
@@ -159,18 +199,19 @@ export async function findLogo(input: FindInput): Promise<FindResult> {
     const f = await fetchImage(c, allowPrivate);
     if (f) fetched.push(f);
   }
-  if (!fetched.length) return { ok: false, website: site, reason: exclude.size ? `No other logo found on ${new URL(site).hostname}.` : `No logo found on ${new URL(site).hostname}.` };
+  const host = new URL(site).hostname;
+  if (!fetched.length) return { ok: false, website: site, reason: exclude.size ? `No other logo found on ${host}. Enter another website, or a link to the logo image.` : `No logo found on ${host}. Check the website, or enter a link to the logo image.` };
 
   let pick: Fetched | null = null, method: 'claude' | 'ranking' = 'ranking', confidence = 'low', reason = 'Best-ranked image on the site.';
   if (hasKey()) {
     try {
       const r = await claudePick(input.name, site, fetched);
       method = 'claude'; confidence = r.confidence; reason = r.reason;
-      if (r.index == null) return { ok: false, website: site, reason: 'Claude found no logo among the images on the site. ' + r.reason };
+      if (r.index == null) return { ok: false, website: site, reason: `Claude found no logo among the images on ${host}. ${r.reason}` };
       pick = fetched[r.index];
     } catch { /* fall back to the ranking below */ }
   }
   if (!pick) pick = fetched[0];
   const logo = await storeLogo(input.companyId, pick.bytes, pick.type);
-  return { ok: true, logo, origin: pick.url, website: site, method, confidence, reason };
+  return { ok: true, logo, origin: pick.url, website: site, method, confidence, reason, via };
 }

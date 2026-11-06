@@ -40,7 +40,8 @@ export interface Store {
   applyWeights: (lens: 'partnering' | 'services', weights: number[]) => Promise<number>;
   setPicklist: (key: 'post' | 'ant' | 'met', list: string[]) => Promise<void>;
   /** Claude finds a logo for a company without one (or tries again after a rejection). Returns a short outcome to show. */
-  findLogo: (id: string) => Promise<{ ok: boolean; message: string }>;
+  /** Finds a logo online. `website` points the search at the right site, or straight at a logo image. */
+  findLogo: (id: string, opts?: { website?: string }) => Promise<{ ok: boolean; message: string }>;
   /** The owner says the Claude-found logo is right. */
   confirmLogo: (id: string) => Promise<void>;
   /** The owner says the logo is wrong: remember it, then look for another. */
@@ -142,19 +143,26 @@ export function StoreProvider({ initial, loadError = '', children }: { initial: 
     try { await api('/api/settings', 'POST', { key, value: list }); } catch (e) { fail(e); }
   }, []);
 
-  const findLogo = useCallback(async (id: string) => {
+  const findLogo = useCallback(async (id: string, opts?: { website?: string }) => {
     const c = ref.current.companies.find(x => x.id === id);
     if (!c) return { ok: false, message: 'Company not found.' };
+    const given = opts?.website?.trim();
     try {
-      const r = await api<{ ok: boolean; logo?: string; origin?: string; website?: string | null; reason: string; confidence?: string }>('/api/logo/find', 'POST', { companyId: c.id, name: c.name, website: c.website, city: c.city, country: c.cdisp, exclude: c.logoRejected });
+      const r = await api<{ ok: boolean; logo?: string; origin?: string; website?: string | null; reason: string; confidence?: string; method?: string; via?: string }>('/api/logo/find', 'POST', { companyId: c.id, name: c.name, website: given || c.website, city: c.city, country: c.cdisp, exclude: c.logoRejected });
       const now = ref.current.companies.find(x => x.id === id) || c;
       const host = (w: string | null | undefined) => { try { return w ? new URL(w).hostname.replace(/^www\./, '') : ''; } catch { return ''; } };
       if (!r.ok || !r.logo) {
         if (!now.website && r.website) await saveCompany({ ...now, website: host(r.website) });
         return { ok: false, message: r.reason };
       }
-      await saveCompany({ ...now, logo: r.logo, logoSource: 'auto', logoOrigin: r.origin || null, website: now.website || host(r.website) }, { strict: true });
-      return { ok: true, message: `Found on ${host(r.website)}${r.confidence ? ' · ' + r.confidence + ' confidence' : ''}` };
+      if (r.method === 'given') {
+        await saveCompany({ ...now, logo: r.logo, logoSource: 'confirmed', logoOrigin: r.origin || null }, { strict: true });
+        return { ok: true, message: 'Logo saved from the link you gave.' };
+      }
+      // A website the owner typed replaces the profile's; one found by search only fills a blank.
+      const site = given ? host(r.website) || now.website : now.website || host(r.website);
+      await saveCompany({ ...now, logo: r.logo, logoSource: 'auto', logoOrigin: r.origin || null, website: site }, { strict: true });
+      return { ok: true, message: `Found on ${host(r.website)}${r.via === 'firecrawl' ? ' (live page)' : ''}${r.confidence ? ' · ' + r.confidence + ' confidence' : ''}` };
     } catch (e) { return { ok: false, message: e instanceof Error ? e.message : String(e) }; }
   }, [saveCompany]);
 

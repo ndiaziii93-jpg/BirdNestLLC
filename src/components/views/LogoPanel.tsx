@@ -35,7 +35,7 @@ export function LogoPanel() {
   return (
     <div className="spanel edit-only lpanel">
       <h2>Logos</h2>
-      <p>Claude finds each company&apos;s logo on its website. Check each one: <b>Right</b> keeps it, <b>Wrong</b> makes Claude try another image and never offers that one again. Logos you upload yourself are never replaced.</p>
+      <p>Claude finds each company&apos;s logo on its website. Check each one: <b>Right</b> keeps it, <b>Wrong</b> makes Claude try another image and never offers that one again. If it looks on the wrong site, enter the right website or paste a link to the logo image. Logos you upload yourself are never replaced.</p>
       <div className="lsum">
         <span><b className="mono">{toCheck.length}</b> to check</span>
         <span><b className="mono">{missing.length}</b> without a logo</span>

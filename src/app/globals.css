@@ -226,6 +226,15 @@
 .lchk.light .lbtn:hover:not([disabled]){border-color:var(--teal);color:var(--teal)}
 .lchk.light em{color:var(--brassInk);flex-basis:100%;text-align:right}
 .lchk .lbtn[disabled]{opacity:.5;cursor:default}
+.lchk .lbtn.ghost{background:none;border:0;padding:0 2px;text-decoration:underline;text-underline-offset:3px}
+.lchk.dark .lbtn.ghost{color:#B9CFCD}
+.lchk.light .lbtn.ghost{color:var(--muted);border:0;background:none}
+.lsite{display:flex;align-items:center;gap:6px;flex-basis:100%;flex-wrap:wrap}
+.lchk.light .lsite{justify-content:flex-end}
+.lsite input{flex:1 1 220px;max-width:340px;height:30px;padding:0 10px;border-radius:8px;font:inherit;font-size:12px}
+.lchk.dark .lsite input{border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.08);color:#fff}
+.lchk.dark .lsite input::placeholder{color:#8FAFAC}
+.lchk.light .lsite input{border:1px solid var(--strong);background:#fff;color:var(--ink)}
 .lspan{grid-column:1/-1}
 .lpanel .lsum{display:flex;align-items:center;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
 .lpanel .lsum b{font-size:18px;color:var(--ink);margin-right:4px}
