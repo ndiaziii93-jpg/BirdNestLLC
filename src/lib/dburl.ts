@@ -7,9 +7,11 @@
  */
 export function prismaUrl(raw: string | undefined): string | undefined {
   if (!raw) return raw;
-  const pooled = /:6543(\/|\?|$)/.test(raw) || /pooler\.supabase\.com:6543/.test(raw);
-  if (!pooled) return raw;
-  let u = raw;
+  // A pasted value often carries a trailing space or newline; left in, it would end up in the database name.
+  const clean = raw.trim();
+  const pooled = /:6543(\/|\?|$)/.test(clean) || /pooler\.supabase\.com:6543/.test(clean);
+  if (!pooled) return clean;
+  let u = clean;
   const add = (k: string, v: string) => { if (!new RegExp(`[?&]${k}=`).test(u)) u += (u.includes('?') ? '&' : '?') + `${k}=${v}`; };
   add('pgbouncer', 'true');
   add('connection_limit', '1');
