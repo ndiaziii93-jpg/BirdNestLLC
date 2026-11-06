@@ -19,7 +19,7 @@ The approved design lives in [`design/`](design/) (the HTML prototype and screen
 | Scoring, matching, filters, sample data (pure functions) | `src/lib/` |
 | Persistence (Prisma + Postgres), auth (Supabase Google sign-in), logos (Supabase Storage) | `src/lib/repo.ts`, `src/proxy.ts`, `src/app/api/` |
 
-**Logos** are found by Claude: the server reads each company's website (searching for it when the profile has none), collects the images that look like a logo, and Claude picks the official one. A found logo is marked to check: **Right** keeps it, **Wrong** makes Claude try another image and remembers the rejected one. It runs after Add company and Import; Settings → Data → Logos lists every logo to check and finds all missing ones at once. Uploaded logos are never replaced.
+**Logos** are found by Claude: the server reads each company's live website through [Firecrawl](https://firecrawl.dev) (which renders the page like a browser and reports its brand logo; without a Firecrawl key it reads the page directly), searches the web for the site when the profile has none, collects the images that look like a logo, and Claude picks the official one. If it looked on the wrong site, **Enter website** / **Wrong website?** lets you type the right site, or paste a link straight to the logo image (saved as given). A found logo is marked to check: **Right** keeps it, **Wrong** makes Claude try another image and remembers the rejected one. It runs after Add company and Import; Settings → Data → Logos lists every logo to check and finds all missing ones at once. Uploaded logos are never replaced.
 
 Present mode (top bar) hides private notes and every edit control so the screen can be shown to others.
 
@@ -47,7 +47,7 @@ With `AUTH_DISABLED=true` there is no sign-in. Open Settings → Data → **Load
    - *Storage*: SQL editor → run [`supabase/setup.sql`](supabase/setup.sql) once (creates the public `logos` bucket).
    - *Keys*: Project Settings → API → copy the project URL, the `anon` key and the `service_role` key.
 2. **Vercel project** → Import the GitHub repo. Framework preset Next.js, build command `npm run build` (default). Add the environment variables from `.env.example`:
-   `DATABASE_URL`, `DIRECT_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_LOGO_BUCKET=logos`, `OWNER_EMAIL=ndiaziii93@gmail.com`, `AUTH_DISABLED=false`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`.
+   `DATABASE_URL`, `DIRECT_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_LOGO_BUCKET=logos`, `OWNER_EMAIL=ndiaziii93@gmail.com`, `AUTH_DISABLED=false`, `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL=claude-sonnet-5-5`, `FIRECRAWL_API_KEY` (optional; lets the logo finder see live pages and search the web).
 3. **Create the tables** once, from your laptop, with the direct connection string:
    `DATABASE_URL=... DIRECT_URL=... npx prisma migrate deploy`
    (Or add `npx prisma migrate deploy &&` in front of the Vercel build command so every deploy applies pending migrations.)

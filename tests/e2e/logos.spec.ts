@@ -51,7 +51,7 @@ test('import finds a logo for each new company; Right confirms, Wrong tries anot
   await page.keyboard.press('Escape');
   await page.goto('/companies');
   await page.locator('.crow', { hasText: 'Arctic Bio' }).click();
-  await page.locator('#acsheet .lchk button', { hasText: 'Wrong' }).click();
+  await page.locator('#acsheet .lchk button', { hasText: /^Wrong$/ }).click();
   await expect(page.locator('#acsheet .lchk em')).toContainText('Found on arcticbio.test');
   d = await dataset(page);
   const arctic = byName(d, 'Arctic Bio');
@@ -83,4 +83,45 @@ test('Settings finds every missing logo and lists them for checking; sample comp
   expect(calls).toHaveLength(2);
   await panel.locator('.lrow', { hasText: 'Foventa' }).locator('button', { hasText: 'Right' }).click();
   await expect(panel.locator('.lsum')).toContainText('1 to check');
+});
+
+test('when no logo is found, the owner points Claude at the right website or straight at the logo image', async ({ page }) => {
+  const calls: { name: string; website: string | null }[] = [];
+  await page.route('**/api/logo/find', async route => {
+    const b = JSON.parse(route.request().postData() || '{}');
+    calls.push({ name: b.name, website: b.website ?? null });
+    if (b.website === 'foventa-real.com') return route.fulfill({ json: { ok: true, logo: PNG, origin: 'https://www.foventa-real.com/brand.svg', website: 'https://www.foventa-real.com/', method: 'claude', confidence: 'high', reason: 'Header logo', via: 'firecrawl' } });
+    if (b.website === 'https://cdn.arctic.test/logo.png') return route.fulfill({ json: { ok: true, logo: PNG, origin: b.website, website: null, method: 'given', confidence: 'high', reason: 'The logo link you gave.', via: 'direct' } });
+    return route.fulfill({ json: { ok: false, website: b.website ? 'https://' + b.website + '/' : null, reason: `No logo found on ${b.website || 'the site'}. Check the website, or enter a link to the logo image.` } });
+  });
+  await page.goto('/settings');
+  await page.locator('.stabs button', { hasText: 'Data' }).click();
+  await page.locator('.spanel', { hasText: 'Import' }).locator('button', { hasText: 'Import profiles' }).click();
+  await page.locator('#import-files').setInputFiles(fx('import-two.json'));
+  await page.locator('.afoot .primary', { hasText: 'Review 2 companies' }).click();
+  await page.locator('.afoot .primary', { hasText: 'Import 2 companies' }).click();
+  await expect(page.locator('#isheet')).toContainText('Logos found for 0 of 2');
+  await page.locator('.afoot .primary', { hasText: 'Done' }).click();
+
+  // A failed search opens the website box (prefilled with the profile's site, blank here).
+  const row = page.locator('.lpanel .lrow', { hasText: 'Foventa' });
+  await row.locator('button', { hasText: 'Find logo with Claude' }).click();
+  await expect(row.locator('em')).toContainText('No logo found');
+  const box = row.locator('.lsite input');
+  await expect(box).toHaveValue('');
+  await box.fill('foventa-real.com');
+  await row.locator('button', { hasText: 'Find logo here' }).click();
+  await expect(page.locator('.lpanel .lrow', { hasText: 'Foventa' })).toContainText('Logo found by Claude on foventa-real.com');
+  let d = await dataset(page);
+  expect(byName(d, 'Foventa')).toMatchObject({ logoSource: 'auto', website: 'foventa-real.com', logoOrigin: 'https://www.foventa-real.com/brand.svg' });
+  expect(calls.at(-1)).toEqual({ name: 'Foventa', website: 'foventa-real.com' });
+
+  // A direct link to the logo image is saved as given, already confirmed.
+  const arctic = page.locator('.lpanel .lrow', { hasText: 'Arctic Bio' });
+  await arctic.locator('button', { hasText: 'Enter website' }).click();
+  await arctic.locator('.lsite input').fill('https://cdn.arctic.test/logo.png');
+  await arctic.locator('.lsite input').press('Enter');
+  await expect(page.locator('.lpanel .lrow', { hasText: 'Arctic Bio' })).toHaveCount(0);
+  d = await dataset(page);
+  expect(byName(d, 'Arctic Bio')).toMatchObject({ logoSource: 'confirmed', logoOrigin: 'https://cdn.arctic.test/logo.png' });
 });

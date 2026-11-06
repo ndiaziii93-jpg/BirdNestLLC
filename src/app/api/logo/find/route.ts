@@ -3,9 +3,9 @@ import { guard, handle } from '../../_guard';
 import { findLogo } from '@/lib/logo';
 
 export const dynamic = 'force-dynamic';
-export const maxDuration = 90;
+export const maxDuration = 120;
 
-/** Finds and stores a company's logo. Body: { companyId, name, website?, city?, country?, exclude? }. Saves nothing on the company itself. */
+/** Finds and stores a company's logo. Body: { companyId, name, website?, city?, country?, exclude? }; website may be a site the owner typed or a direct link to the logo image. Saves nothing on the company itself. */
 export const POST = handle(async (req: Request) => {
   const g = await guard(); if (g) return g;
   const b = (await req.json()) as { companyId?: string; name?: string; website?: string | null; city?: string; country?: string; exclude?: string[] };
