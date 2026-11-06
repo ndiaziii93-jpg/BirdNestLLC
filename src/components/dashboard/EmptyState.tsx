@@ -4,9 +4,11 @@ import { useStore } from '@/store/StoreProvider';
 import { useUi } from '@/store/UiProvider';
 
 export function EmptyState() {
-  const { loadSample } = useStore();
+  const { loadSample, loadError } = useStore();
   const ui = useUi();
   const [busy, setBusy] = useState(false);
+  // An unreadable database is not an empty one: don't invite loading sample data over real records.
+  if (loadError) return null;
   return (
     <section className="empty-state" aria-label="Getting started">
       <span className="ovl">Nothing tracked yet</span>

@@ -25,6 +25,8 @@ export interface Store {
   intros: Intro[];
   settings: Settings;
   today: string;
+  /** Set when the data could not be read; screens then show nothing instead of an empty Hub. */
+  loadError: string;
   error: string;
   clearError: () => void;
   byId: (id: string) => Company | undefined;
@@ -43,7 +45,7 @@ export interface Store {
 
 const Ctx = createContext<Store | null>(null);
 
-export function StoreProvider({ initial, children }: { initial: Dataset; children: React.ReactNode }) {
+export function StoreProvider({ initial, loadError = '', children }: { initial: Dataset; loadError?: string; children: React.ReactNode }) {
   const [companies, setCompanies] = useState<Company[]>(initial.companies);
   const [intros, setIntros] = useState<Intro[]>(initial.intros);
   const [settings, setSettings] = useState<Settings>(initial.settings);
@@ -149,8 +151,8 @@ export function StoreProvider({ initial, children }: { initial: Dataset; childre
   }, []);
 
   const value: Store = useMemo(() => ({
-    companies, intros, settings, today, error, clearError: () => setError(''), byId, saveCompany, deleteCompany, addNote, moveStage, introduce, updateBuyBox, applyWeights, setPicklist, loadSample, clearSample,
-  }), [companies, intros, settings, today, error, byId, saveCompany, deleteCompany, addNote, moveStage, introduce, updateBuyBox, applyWeights, setPicklist, loadSample, clearSample]);
+    companies, intros, settings, today, loadError, error, clearError: () => setError(''), byId, saveCompany, deleteCompany, addNote, moveStage, introduce, updateBuyBox, applyWeights, setPicklist, loadSample, clearSample,
+  }), [companies, intros, settings, today, loadError, error, byId, saveCompany, deleteCompany, addNote, moveStage, introduce, updateBuyBox, applyWeights, setPicklist, loadSample, clearSample]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

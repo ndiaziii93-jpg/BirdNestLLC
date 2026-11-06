@@ -13,13 +13,13 @@ export function Shell({ initial, signedIn, authOn, dbError, children }: { initia
   const path = usePathname();
   if (path.startsWith('/signin') || !signedIn) return <>{children}</>;
   return (
-    <StoreProvider initial={initial}>
+    <StoreProvider initial={initial} loadError={dbError}>
       <UiProvider>
         <SearchProvider>
         <DashProvider>
           <div className="app" id="app" data-view={path === '/' ? 'map' : path.slice(1)}>
             <TopBar />
-            {dbError ? <div className="dberr"><b>Database not reachable.</b> {dbError} · Check DATABASE_URL and run <code>npx prisma migrate deploy</code>.</div> : null}
+            {dbError ? <div className="dberr"><b>Could not read your data.</b> Nothing has been lost; reload the page in a moment. If this keeps happening, send this to whoever maintains the Hub: <code>{dbError}</code></div> : null}
             {children}
             <div className="foot">BIRDNEST · NDIII{authOn ? <form action="/auth/signout" method="post" style={{ display: 'inline' }}><button className="signout">Sign out</button></form> : null}</div>
           </div>
