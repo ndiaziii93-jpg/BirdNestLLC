@@ -39,6 +39,12 @@ export interface Store {
   updateBuyBox: (id: string, bb: BuyBox) => Promise<void>;
   applyWeights: (lens: 'partnering' | 'services', weights: number[]) => Promise<number>;
   setPicklist: (key: 'post' | 'ant' | 'met', list: string[]) => Promise<void>;
+  /** Claude finds a logo for a company without one (or tries again after a rejection). Returns a short outcome to show. */
+  findLogo: (id: string) => Promise<{ ok: boolean; message: string }>;
+  /** The owner says the Claude-found logo is right. */
+  confirmLogo: (id: string) => Promise<void>;
+  /** The owner says the logo is wrong: remember it, then look for another. */
+  rejectLogo: (id: string) => Promise<{ ok: boolean; message: string }>;
   loadSample: () => Promise<void>;
   clearSample: () => Promise<void>;
 }
@@ -136,6 +142,37 @@ export function StoreProvider({ initial, loadError = '', children }: { initial: 
     try { await api('/api/settings', 'POST', { key, value: list }); } catch (e) { fail(e); }
   }, []);
 
+  const findLogo = useCallback(async (id: string) => {
+    const c = ref.current.companies.find(x => x.id === id);
+    if (!c) return { ok: false, message: 'Company not found.' };
+    try {
+      const r = await api<{ ok: boolean; logo?: string; origin?: string; website?: string | null; reason: string; confidence?: string }>('/api/logo/find', 'POST', { companyId: c.id, name: c.name, website: c.website, city: c.city, country: c.cdisp, exclude: c.logoRejected });
+      const now = ref.current.companies.find(x => x.id === id) || c;
+      const host = (w: string | null | undefined) => { try { return w ? new URL(w).hostname.replace(/^www\./, '') : ''; } catch { return ''; } };
+      if (!r.ok || !r.logo) {
+        if (!now.website && r.website) await saveCompany({ ...now, website: host(r.website) });
+        return { ok: false, message: r.reason };
+      }
+      await saveCompany({ ...now, logo: r.logo, logoSource: 'auto', logoOrigin: r.origin || null, website: now.website || host(r.website) }, { strict: true });
+      return { ok: true, message: `Found on ${host(r.website)}${r.confidence ? ' · ' + r.confidence + ' confidence' : ''}` };
+    } catch (e) { return { ok: false, message: e instanceof Error ? e.message : String(e) }; }
+  }, [saveCompany]);
+
+  const confirmLogo = useCallback(async (id: string) => {
+    const c = ref.current.companies.find(x => x.id === id);
+    if (c) await saveCompany({ ...c, logoSource: 'confirmed' });
+  }, [saveCompany]);
+
+  const rejectLogo = useCallback(async (id: string) => {
+    const c = ref.current.companies.find(x => x.id === id);
+    if (!c) return { ok: false, message: 'Company not found.' };
+    const rejected = c.logoOrigin && !c.logoRejected.includes(c.logoOrigin) ? [...c.logoRejected, c.logoOrigin] : c.logoRejected;
+    const cleared = { ...c, logo: null, logoSource: null, logoOrigin: null, logoRejected: rejected };
+    await saveCompany(cleared, { strict: true });
+    ref.current = { ...ref.current, companies: ref.current.companies.map(x => (x.id === id ? cleared : x)) };
+    return findLogo(id);
+  }, [saveCompany, findLogo]);
+
   const loadSample = useCallback(async () => {
     try {
       const d = await api<Dataset>('/api/sample', 'POST');
@@ -151,8 +188,8 @@ export function StoreProvider({ initial, loadError = '', children }: { initial: 
   }, []);
 
   const value: Store = useMemo(() => ({
-    companies, intros, settings, today, loadError, error, clearError: () => setError(''), byId, saveCompany, deleteCompany, addNote, moveStage, introduce, updateBuyBox, applyWeights, setPicklist, loadSample, clearSample,
-  }), [companies, intros, settings, today, loadError, error, byId, saveCompany, deleteCompany, addNote, moveStage, introduce, updateBuyBox, applyWeights, setPicklist, loadSample, clearSample]);
+    companies, intros, settings, today, loadError, error, clearError: () => setError(''), byId, saveCompany, deleteCompany, addNote, moveStage, introduce, updateBuyBox, applyWeights, setPicklist, findLogo, confirmLogo, rejectLogo, loadSample, clearSample,
+  }), [companies, intros, settings, today, loadError, error, byId, saveCompany, deleteCompany, addNote, moveStage, introduce, updateBuyBox, applyWeights, setPicklist, findLogo, confirmLogo, rejectLogo, loadSample, clearSample]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

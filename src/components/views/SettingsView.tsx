@@ -8,6 +8,7 @@ import { companiesCsv, downloadText } from '@/lib/csv';
 import { CompactMark, XIcon } from '../Lockup';
 import { Seg } from '../bits';
 import { ViewHead } from './ViewHead';
+import { LogoPanel } from './LogoPanel';
 
 /** Number box that commits on blur or Enter, like the prototype's onchange, so typing "40" is one step not two. */
 function NumberBox({ value, label, onCommit }: { value: number; label: string; onCommit: (v: number) => void }) {
@@ -80,6 +81,7 @@ export function SettingsView() {
         <div className="spanel"><h2>Export</h2><p>Every company with its fit, decision, deal stage and next catalyst.</p><div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button className="sec" onClick={() => downloadText(companiesCsv([...companies].sort((a, b) => b.fit - a.fit), today), 'birdnest-all-companies.csv')}>Export all companies (CSV)</button></div></div>
         <div className="spanel edit-only"><h2>Sample data</h2><p>{sampleN ? `${sampleN} sample companies are loaded, each tagged as sample. Remove them when you are ready to run on your own data; your own records are untouched.` : 'Load 60 sample companies, buyers and investors to explore the Hub. They are tagged as sample and can be removed at any time.'}</p>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>{sampleN ? <button className="sec" disabled={busy} onClick={async () => { if (!confirm(`Remove ${sampleN} sample companies?`)) return; setBusy(true); await clearSample(); setBusy(false); }}>{busy ? 'Working…' : 'Remove sample data'}</button> : <button className="primary" disabled={busy} onClick={async () => { setBusy(true); await loadSample(); setBusy(false); }}>{busy ? 'Loading…' : 'Load sample data'}</button>}</div></div>
+        <div className="lspan"><LogoPanel /></div>
       </div> : null}
     </section>
   );

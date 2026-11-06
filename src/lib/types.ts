@@ -78,6 +78,12 @@ export interface Company {
   prevFit: number;
   fit: number;
   logo: string | null;
+  /** auto: found by Claude and not yet checked · confirmed: checked by the owner · manual: uploaded by the owner */
+  logoSource: 'auto' | 'confirmed' | 'manual' | null;
+  /** Address the logo image was taken from. */
+  logoOrigin: string | null;
+  /** Logo addresses the owner marked wrong; never offered again. */
+  logoRejected: string[];
   appetite: string; // pharma: deal appetite · investor: check size
   scale: string; // pharma: revenue · investor: stage focus
   lens: Lens;

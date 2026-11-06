@@ -16,7 +16,7 @@ export function rowToCompany(r: Row): Company {
     trend: r.trend, dec: r.dec as Company['dec'], deal: r.deal, cat: r.cat, runway: r.runway, runwayAsOf: r.runwayAsOf ? toISO(r.runwayAsOf) : null, raise: r.raise,
     rightsArr: arr<boolean>(r.rightsArr, [true, true, true, true, true, true]), own: r.own, founded: r.founded, heads: r.heads, rationale: r.rationale,
     scores: arr<number>(r.scores, [3, 3, 3, 3, 3, 3]), why: arr<string>(r.why, ['', '', '', '', '', '']), svcScores: arr<number>(r.svcScores, [3, 3, 3, 3, 3]), svcWhy: arr<string>(r.svcWhy, ['', '', '', '', '']),
-    prevFit: r.prevFit, fit: r.fit, logo: r.logo, appetite: r.appetite, scale: r.scale, lens: r.lens as Company['lens'],
+    prevFit: r.prevFit, fit: r.fit, logo: r.logo, logoSource: (r.logoSource as Company['logoSource']) ?? null, logoOrigin: r.logoOrigin ?? null, logoRejected: arr<string>(r.logoRejected, []), appetite: r.appetite, scale: r.scale, lens: r.lens as Company['lens'],
     ai: (r.ai as unknown as Company['ai']) ?? null, buyBox: (r.buyBox as unknown as Company['buyBox']) ?? null,
     notes: r.notes.map(n => ({ id: n.id, date: toISO(n.date), type: n.type as Company['notes'][number]['type'], text: n.text, priv: n.priv })),
     sample: r.sample,
@@ -28,7 +28,7 @@ export function companyToRow(c: Company): Omit<Prisma.CompanyUncheckedCreateInpu
     id: c.id, kind: c.kind, name: c.name, website: c.website, city: c.city, cdisp: c.cdisp, country: c.country, region: c.region, lat: c.lat, lon: c.lon,
     type: c.type, seg: c.seg, ind: c.ind, asset: c.asset, phase: c.phase, phaseLabel: c.phaseLabel, trend: c.trend, dec: c.dec, deal: c.deal, cat: c.cat,
     runway: c.runway, runwayAsOf: c.runwayAsOf ? new Date(c.runwayAsOf + 'T00:00:00Z') : null, raise: c.raise, rightsArr: c.rightsArr, own: c.own, founded: c.founded, heads: c.heads,
-    rationale: c.rationale, scores: c.scores, why: c.why, svcScores: c.svcScores, svcWhy: c.svcWhy, prevFit: c.prevFit, fit: c.fit, logo: c.logo, appetite: c.appetite, scale: c.scale,
+    rationale: c.rationale, scores: c.scores, why: c.why, svcScores: c.svcScores, svcWhy: c.svcWhy, prevFit: c.prevFit, fit: c.fit, logo: c.logo, logoSource: c.logoSource ?? null, logoOrigin: c.logoOrigin ?? null, logoRejected: c.logoRejected ?? [], appetite: c.appetite, scale: c.scale,
     lens: c.lens, ai: (c.ai ?? undefined) as Prisma.InputJsonValue | undefined, buyBox: (c.buyBox ?? undefined) as Prisma.InputJsonValue | undefined, sample: c.sample,
   };
 }

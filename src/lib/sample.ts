@@ -168,7 +168,7 @@ export function buildSample(today: string = todayISO()): { companies: Company[];
     type: d.type, seg: d.seg, ind: d.ind, asset: d.asset, phase: d.phase, phaseLabel: d.phaseLabel, trend: d.trend, dec: d.dec, deal: d.deal, cat: d.cat,
     runway: d.kind === 'seeking' ? d.runway : null, runwayAsOf: d.kind === 'seeking' ? runwayAsOf : null, raise: d.raise, rightsArr: d.rightsArr || [false, false, false, false, false, false],
     own: d.own, founded: d.founded || '', heads: d.heads || '', rationale: d.rationale || '', scores: d.scores || [3, 3, 3, 3, 3, 3], why: d.why || ['', '', '', '', '', ''],
-    svcScores: [3, 3, 3, 3, 3], svcWhy: ['', '', '', '', ''], prevFit: d.prevFit ?? d.fit, fit: d.fit, logo: null, appetite: d.appetite || '', scale: d.scale || '', lens: 'partnering',
+    svcScores: [3, 3, 3, 3, 3], svcWhy: ['', '', '', '', ''], prevFit: d.prevFit ?? d.fit, fit: d.fit, logo: null, logoSource: null, logoOrigin: null, logoRejected: [], appetite: d.appetite || '', scale: d.scale || '', lens: 'partnering',
     ai: d.id === 's0' ? LUMEN : null,
     buyBox: BUY[d.id] ? { ...BUY[d.id], whereMet: BUY[d.id].whereMet || '' } : null,
     notes: (d.notes || []).map((n, i): Note => ({ id: `${d.id}-n${i}`, date: isoDaysAgo(n[0], today), type: n[1] as NoteType, text: n[2], priv: !!n[3] })),

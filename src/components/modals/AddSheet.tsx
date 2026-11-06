@@ -18,20 +18,18 @@ const host = (w: string) => { try { return new URL(/^https?:/.test(w) ? w : 'htt
 const steps = ['Quick add', 'Claude research', 'Your input'];
 
 export function AddSheet() {
-  const { settings, today, saveCompany, setPicklist } = useStore();
+  const { settings, today, saveCompany, setPicklist, findLogo } = useStore();
   const ui = useUi();
   const [step, setStep] = useState<Step>(1);
   const [name, setName] = useState(''); const [web, setWeb] = useState(''); const [hq, setHq] = useState('');
   const [res, setRes] = useState<ResearchT | null>(null);
   const [qa, setQa] = useState<{ q: string; a: string }[]>([]);
   const [notes, setNotes] = useState(''); const [notesPriv, setNotesPriv] = useState(false);
-  const [logoOn, setLogoOn] = useState(true);
   const [err, setErr] = useState(''); const [busy, setBusy] = useState(false);
   const [rot, setRot] = useState(0);
   const nameRef = useRef<HTMLInputElement>(null);
   useEffect(() => { nameRef.current?.focus(); }, [step]);
   useEffect(() => { if (!busy) return; const t = setInterval(() => setRot(k => (k + 1) % 8), 120); return () => clearInterval(t); }, [busy]);
-  const logoUrl = () => (host(web) ? `https://www.google.com/s2/favicons?domain=${host(web)}&sz=128` : '');
 
   const research = async () => {
     if (!name.trim()) { setErr('Add a company name first.'); return; }
@@ -81,9 +79,8 @@ export function AddSheet() {
     const country = atlasName(r.country || '');
     const region: Company['region'] = (REGIONS as readonly string[]).includes(r.region || '') ? (r.region as Company['region']) : 'Americas';
     const bb = r.buyBox && kind !== 'seeking' ? { inds: r.buyBox.inds || [], mods: r.buyBox.mods || [], st: [Math.max(0, Math.min(4, r.buyBox.stStart ?? 0)), Math.max(0, Math.min(4, r.buyBox.stEnd ?? 4))] as [number, number], geo: r.buyBox.geo || [], deals: r.buyBox.deals || [], excl: r.buyBox.excl || [], money: (r.buyBox.money || []).map(m => [m.label, m.value] as [string, string]), contact: r.buyBox.contact || '', whereMet: (x && x.whereMet) || '' } : null;
-    let logo: string | null = logoOn && logoUrl() ? logoUrl() : null;
+    const logo: string | null = null;
     const id = uid();
-    if (logo) { try { const lr = await fetch('/api/logo', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ companyId: id, url: logo }) }); if (lr.ok) logo = (await lr.json()).logo; } catch { /* keep favicon url */ } }
     const { loadWorld } = await import('@/lib/world'); const d3 = await import('d3');
     const world = await loadWorld(); const f = world.find(c => c.properties.name === country);
     const ctr = { Americas: [-95, 40], Europe: [10, 50], APAC: [120, 30] }[region];
@@ -92,7 +89,7 @@ export function AddSheet() {
       id, kind, name: name.trim(), website: host(web) || web, city: r.city || hq || '', cdisp: r.country || '', country, region, lat: ll[1] + (Math.random() - 0.5) * 1.5, lon: ll[0] + (Math.random() - 0.5) * 1.5,
       type: ty, seg, ind, asset, phase, phaseLabel: phase || '—', trend: 0, dec: x && ['Pursue', 'Watch', 'Pass'].includes(x.dec) ? x.dec : fit >= 76 ? 'Pursue' : fit >= 50 ? 'Watch' : 'Pass', deal, cat: r.cat || '',
       runway: null, runwayAsOf: null, raise: r.raise || '', rightsArr: [true, true, true, true, true, true], own: r.own || 'Private', founded: r.founded ? String(r.founded) : '', heads: r.heads ? String(r.heads) : '',
-      rationale: (x && x.rationale) || '', scores, why, svcScores: [3, 3, 3, 3, 3], svcWhy: ['', '', '', '', ''], prevFit: fit, fit, logo, appetite: r.appetite || '', scale: r.scale || '', lens: 'partnering',
+      rationale: (x && x.rationale) || '', scores, why, svcScores: [3, 3, 3, 3, 3], svcWhy: ['', '', '', '', ''], prevFit: fit, fit, logo, logoSource: null, logoOrigin: null, logoRejected: [], appetite: r.appetite || '', scale: r.scale || '', lens: 'partnering',
       ai: { overview: r.overview || '', diffs: (r.diffs || []).filter(Boolean).slice(0, 3), risk: r.risk || '', seeking: (x && x.seeking) || r.seeking || 'Not stated', timing: (x && x.timing) || 'Not stated',
         pipe: kind === 'seeking' ? [[asset.split(' · ')[0], asset.split(' · ').slice(1).join(' · ') || ind || '', ty === 'Device' ? [3, 6, 9][DEV_PH.indexOf(phase as (typeof DEV_PH)[number])] ?? 3 : ({ Preclinical: 1, 'Phase 1': 3, 'Phase 2': 5, 'Phase 3': 7, 'Phase 4': 9 } as Record<string, number>)[phase] ?? 1, r.cat || '—']] : [],
         econ: [], contacts: bb && bb.contact ? [[bb.contact.split(' · ')[0], bb.contact.split(' · ').slice(1).join(' · ') || 'Contact']] : [], rel: [['Where met', (x && x.whereMet) || 'Not recorded'], ...(x && x.nextStep ? [['Next step', x.nextStep] as [string, string]] : [])] },
@@ -102,6 +99,8 @@ export function AddSheet() {
     setBusy(false);
     ui.setSel(saved.id);
     ui.replace({ kind: 'account', id: saved.id });
+    // Claude looks for the logo in the background; the account pop-up asks you to check it.
+    void findLogo(saved.id);
   };
 
   const RING = <svg className="lring" viewBox="21 21 22 22" width="40" height="40" fill="none" style={{ transform: `rotate(${rot * 45}deg)` }}><path d="M38.56 28.17 A7.6 7.6 0 1 1 35.83 25.44" stroke="#0F4C52" strokeWidth="4.4" /><circle cx="30.8" cy="32.3" r="3.2" fill="#B08D57" /></svg>;
@@ -122,7 +121,7 @@ export function AddSheet() {
     foot = <><button className="sec" onClick={() => ui.replace({ kind: 'new', preset: { type: 'Drug', name, website: web, city: hq } })}>Skip and fill in manually</button><span className="sp" /><button className="primary" onClick={research}>Research with Claude</button></>;
   } else if (step === 2 && res) {
     body = <div className="arev"><div className="ahead"><div><h2>{res.found === false ? 'Little public information found' : 'Here is what Claude found'}</h2><p>From a web search of public sources{res.sources?.length ? ` (${res.sources.length} pages)` : ''}. Check anything marked low and edit freely.</p></div>
-      {logoUrl() ? <label className="alogo"><img src={logoUrl()} alt="" onError={e => e.currentTarget.parentElement?.classList.add('nologo')} /><span><b>Logo</b><small>From {host(web)}</small></span><input type="checkbox" checked={logoOn} onChange={e => setLogoOn(e.target.checked)} /><span className="sw" /></label> : null}</div>
+<p className="hint2">Claude looks for the logo on the company&apos;s website after you save; you confirm it on the profile.</p></div>
       <div className="agrid">{F.map(([k, l]) => <label key={k} className="pf"><span>{l}<em className={`cf ${cf(k)}`}>{cf(k)}</em></span><input value={String(res[k] ?? '')} placeholder="Unknown" onChange={e => setR(k, e.target.value)} /></label>)}</div>
       <div className="atext"><label className="pf"><span>Overview<em className={`cf ${res.confidence?.overview || 'medium'}`}>{res.confidence?.overview || 'medium'}</em></span><textarea rows={3} value={res.overview || ''} onChange={e => setR('overview', e.target.value)} /></label>
         {[0, 1, 2].map(i => <label key={i} className="pf"><span>Differentiator {i + 1}</span><input value={(res.diffs || [])[i] || ''} onChange={e => setRes(r => { if (!r) return r; const d = [...(r.diffs || [])]; d[i] = e.target.value; return { ...r, diffs: d }; })} /></label>)}
@@ -143,7 +142,7 @@ export function AddSheet() {
     <Modal label="Add company" id="amodal" lock={busy}>
       <div className="sheet asheet" id="asheet">
         <div className="pbrand">
-          <span className="plogo" style={{ cursor: 'default' }}>{step > 1 && logoOn && logoUrl() ? <img src={logoUrl()} alt="" onError={e => e.currentTarget.remove()} /> : <span className="mono">{monogram(name || '+')}</span>}</span>
+          <span className="plogo" style={{ cursor: 'default' }}><span className="mono">{monogram(name || '+')}</span></span>
           <div className="pbt"><span className="ovl">New company</span><span className="pbs">{name || 'Public information and your own notes only'}</span></div><span className="sp" />
           <div className="asteps">{steps.map((s, i) => <span key={s} className={step === i + 1 ? 'on' : step > i + 1 ? 'done' : ''}><i>{i + 1}</i>{s}</span>)}</div>
           <span className="vr" /><button className="x" aria-label="Close" onClick={() => { if (!busy) ui.close(); }}><XIcon /></button>

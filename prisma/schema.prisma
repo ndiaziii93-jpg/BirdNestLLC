@@ -45,6 +45,9 @@ model Company {
   prevFit    Int      @default(60)
   fit        Int      @default(60)
   logo       String?
+  logoSource String? // auto (found by Claude, not yet checked) | confirmed | manual
+  logoOrigin String? // address the logo was taken from
+  logoRejected Json  @default("[]") // addresses the owner marked wrong
   appetite   String   @default("")
   scale      String   @default("")
   lens       String   @default("partnering") // partnering | services

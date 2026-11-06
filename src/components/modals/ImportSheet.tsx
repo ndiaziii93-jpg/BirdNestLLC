@@ -16,7 +16,7 @@ const steps = ['Add files', 'Review', 'Done'];
 const FIELDS: [keyof Draft, string][] = [['city', 'HQ city'], ['country', 'Country'], ['own', 'Ownership'], ['founded', 'Founded'], ['ind', 'Lead indication'], ['asset', 'Lead asset'], ['phase', 'Stage'], ['cat', 'Next catalyst'], ['raise', 'Last raise'], ['seeking', 'Seeking'], ['website', 'Website'], ['heads', 'Headcount']];
 
 export function ImportSheet() {
-  const { companies, settings, today, saveCompany, setPicklist } = useStore();
+  const { companies, settings, today, saveCompany, setPicklist, findLogo } = useStore();
   const ui = useUi();
   const [step, setStep] = useState(1);
   const [files, setFiles] = useState<FileRow[]>([]);
@@ -25,6 +25,7 @@ export function ImportSheet() {
   const [drag, setDrag] = useState(false);
   const [saved, setSaved] = useState<{ c: Company; updated: boolean }[]>([]);
   const [failed, setFailed] = useState<{ d: Draft; why: string }[]>([]);
+  const [logos, setLogos] = useState<Record<string, { state: 'waiting' | 'finding' | 'found' | 'none'; msg: string }>>({});
   const inp = useRef<HTMLInputElement>(null);
 
   const reading = files.some(f => f.status === 'reading');
@@ -77,12 +78,6 @@ export function ImportSheet() {
       }
       const c = applyDraft(existing, d, { settings: s2, today, uid, lonLat });
       if (!existing && c.lat === 0 && c.lon === 0) { const ctr = CTR[c.region]; c.lon = ctr[0] + (Math.random() - 0.5) * 1.5; c.lat = ctr[1] + (Math.random() - 0.5) * 1.5; }
-      if (!c.logo && c.website) {
-        try {
-          const lr = await fetch('/api/logo', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ companyId: c.id, url: `https://www.google.com/s2/favicons?domain=${c.website}&sz=128` }) });
-          if (lr.ok) c.logo = (await lr.json()).logo;
-        } catch { /* a logo is optional */ }
-      }
       try {
         const savedC = await saveCompany(c, { strict: true });
         ok.push({ c: savedC, updated: !!existing });
@@ -96,6 +91,14 @@ export function ImportSheet() {
     if (ok[0]) ui.setSel(ok[0].c.id);
     setBusy(false);
     setStep(3);
+    // Claude finds a logo for every saved company that has none; you check them afterwards.
+    const need = ok.map(o => o.c).filter(c => !c.logo && !c.sample);
+    setLogos(l => ({ ...l, ...Object.fromEntries(need.map(c => [c.id, { state: 'waiting' as const, msg: '' }])) }));
+    for (const c of need) {
+      setLogos(l => ({ ...l, [c.id]: { state: 'finding', msg: '' } }));
+      const r = await findLogo(c.id);
+      setLogos(l => ({ ...l, [c.id]: { state: r.ok ? 'found' : 'none', msg: r.message } }));
+    }
   };
   const save = () => saveDrafts(included.map(r => r.d));
 
@@ -169,13 +172,14 @@ export function ImportSheet() {
       <div className="aq imp">
         <h2>{failed.length ? `Imported ${saved.length} of ${total} companies` : `Imported ${saved.length} ${saved.length === 1 ? 'company' : 'companies'}`}</h2>
         <p>{nNew} new · {nUpd} updated{failed.length ? ` · ${failed.length} not saved` : ''}. Each profile is open for scoring and tweaks; fit stays at the default until you score it.</p>
+        {Object.keys(logos).length ? <p className="hint2">{Object.values(logos).some(x => x.state === 'waiting' || x.state === 'finding') ? `Claude is finding logos: ${Object.values(logos).filter(x => x.state === 'found' || x.state === 'none').length} of ${Object.keys(logos).length} done. You can close this; it carries on while the Hub is open.` : `Logos found for ${Object.values(logos).filter(x => x.state === 'found').length} of ${Object.keys(logos).length}. Check them in Settings → Data → Logos, or on each company.`}</p> : null}
         {failed.length ? (
           <div className="icda" role="alert"><b>{failed.length === 1 ? '1 company was not saved.' : `${failed.length} companies were not saved.`}</b> Nothing was half-written; retry below. If it fails again, send the reason shown to whoever maintains the Hub.
             <div className="ifiles ifail">{failed.map((f, i) => <div key={i} className="ifile error"><span className="nm">{f.d.name}</span><span className="st">{f.why}</span></div>)}</div>
           </div>
         ) : null}
         {saved.length ? <div className="ifiles">{saved.map(s => (
-          <button key={s.c.id} className="ifile done ilink" onClick={() => ui.replace({ kind: 'profile', id: s.c.id })}><span className="nm">{s.c.name}</span><span className="st">{s.updated ? 'Updated' : 'New'} · open profile</span></button>
+          <button key={s.c.id} className="ifile done ilink" onClick={() => ui.replace({ kind: 'account', id: s.c.id })}><span className="nm">{s.c.name}</span><span className="st">{s.updated ? 'Updated' : 'New'}{logos[s.c.id] ? ' · ' + ({ waiting: 'logo queued', finding: 'finding logo…', found: 'logo found, check it', none: 'no logo found' } as const)[logos[s.c.id].state] : ''} · open</span></button>
         ))}</div> : null}
       </div>
     );
