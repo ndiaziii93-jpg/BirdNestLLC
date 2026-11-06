@@ -152,7 +152,7 @@ export function applyDraft(existing: Company | null, d: Draft, ctx: ApplyCtx): C
     id: uid(), kind, name: d.name.trim(), website: '', city: '', cdisp: '', country: '', region: 'Americas', lat: 0, lon: 0, type, seg: 'Posterior', ind: '', asset: '',
     phase: buyer ? '' : 'Preclinical', phaseLabel: buyer ? '—' : 'Preclinical', trend: 0, dec: 'Watch', deal: 0, cat: '', runway: null, runwayAsOf: null, raise: '',
     rightsArr: [true, true, true, true, true, true], own: 'Private', founded: '', heads: '', rationale: '', scores: [3, 3, 3, 3, 3, 3], why: ['', '', '', '', '', ''],
-    svcScores: [3, 3, 3, 3, 3], svcWhy: ['', '', '', '', ''], prevFit: 60, fit: 60, logo: null, appetite: '', scale: '', lens: 'partnering', ai: null, buyBox: null,
+    svcScores: [3, 3, 3, 3, 3], svcWhy: ['', '', '', '', ''], prevFit: 60, fit: 60, logo: null, logoSource: null, logoOrigin: null, logoRejected: [], appetite: '', scale: '', lens: 'partnering', ai: null, buyBox: null,
     notes: [], sample: false,
   };
   const c = base;

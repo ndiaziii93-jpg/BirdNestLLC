@@ -19,6 +19,8 @@ The approved design lives in [`design/`](design/) (the HTML prototype and screen
 | Scoring, matching, filters, sample data (pure functions) | `src/lib/` |
 | Persistence (Prisma + Postgres), auth (Supabase Google sign-in), logos (Supabase Storage) | `src/lib/repo.ts`, `src/proxy.ts`, `src/app/api/` |
 
+**Logos** are found by Claude: the server reads each company's website (searching for it when the profile has none), collects the images that look like a logo, and Claude picks the official one. A found logo is marked to check: **Right** keeps it, **Wrong** makes Claude try another image and remembers the rejected one. It runs after Add company and Import; Settings → Data → Logos lists every logo to check and finds all missing ones at once. Uploaded logos are never replaced.
+
 Present mode (top bar) hides private notes and every edit control so the screen can be shown to others.
 
 **Import profiles** (Settings → Data, the Companies page, or the empty dashboard) brings in company profiles written elsewhere: PowerPoint decks, Word, PDF, Markdown or BirdNest JSON. Claude reads documents into BirdNest fields, you review every company before it is saved, and an existing company is updated rather than duplicated. Format, merge rules and a prompt for Claude in another workspace: [`docs/import-format.md`](docs/import-format.md). The seven companies from the Senju review are ready to import in [`docs/examples/senju-review-7.json`](docs/examples/senju-review-7.json).

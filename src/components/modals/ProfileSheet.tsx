@@ -17,7 +17,7 @@ import type { BuyBox, Company, Note } from '@/lib/types';
 const blank = (today: string): Company => ({
   id: '', kind: 'seeking', name: '', website: '', city: '', cdisp: '', country: '', region: 'Americas', lat: 0, lon: 0, type: 'Drug', seg: 'Posterior', ind: '', asset: '', phase: 'Preclinical', phaseLabel: 'Preclinical',
   trend: 0, dec: 'Watch', deal: 0, cat: '', runway: null, runwayAsOf: null, raise: '', rightsArr: [true, true, true, true, true, true], own: 'Private', founded: '', heads: '', rationale: '',
-  scores: [3, 3, 3, 3, 3, 3], why: ['', '', '', '', '', ''], svcScores: [3, 3, 3, 3, 3], svcWhy: ['', '', '', '', ''], prevFit: 60, fit: 60, logo: null, appetite: '', scale: '', lens: 'partnering', ai: null, buyBox: null,
+  scores: [3, 3, 3, 3, 3, 3], why: ['', '', '', '', '', ''], svcScores: [3, 3, 3, 3, 3], svcWhy: ['', '', '', '', ''], prevFit: 60, fit: 60, logo: null, logoSource: null, logoOrigin: null, logoRejected: [], appetite: '', scale: '', lens: 'partnering', ai: null, buyBox: null,
   notes: [{ id: uid(), date: today, type: 'Note', text: 'Added to BirdNest.', priv: false }], sample: false,
 });
 
@@ -64,7 +64,7 @@ export function ProfileSheet({ id, preset }: { id: string | null; preset?: Recor
 
   const onLogo = async (file: File) => {
     const dataUrl = await new Promise<string>(res => { const r = new FileReader(); r.onload = () => res(String(r.result)); r.readAsDataURL(file); });
-    set({ logo: dataUrl });
+    set({ logo: dataUrl, logoSource: 'manual', logoOrigin: null });
     try { const r = await fetch('/api/logo', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ companyId: d.id || 'new', dataUrl }) }); if (r.ok) { const j = await r.json(); set({ logo: j.logo }); } } catch { /* keep inline */ }
   };
 

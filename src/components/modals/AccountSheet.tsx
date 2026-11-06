@@ -8,6 +8,7 @@ import { isBuyer, monogram, rightsOpen } from '@/lib/derive';
 import { candidates, introsFor, matchScore, modOf, otherParty, stageOf, type MatchResult } from '@/lib/match';
 import { fmtDate } from '@/lib/dates';
 import { XIcon, GridIcon, ChevronRight } from '../Lockup';
+import { LogoCheck } from '../LogoCheck';
 import type { BuyBox, Company } from '@/lib/types';
 
 export const Ini = ({ d }: { d: Company }) => (d.logo ? <img src={d.logo} alt="" style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 6 }} /> : <span className="mono">{monogram(d.name)}</span>);
@@ -71,7 +72,7 @@ export function AccountSheet({ id }: { id: string }) {
       <div className="sheet acs" id="acsheet" ref={sheet}>
         <div className="pbrand">
           <span className="plogo" style={{ cursor: 'default' }}><Ini d={d} /></span>
-          <div className="pbt"><span className="ovl">{buyer ? (d.kind === 'pharma' ? 'Big Pharma · buying assets' : 'Investor · deploying capital') : 'Company · seeking capital and partners'}</span><b style={{ fontSize: 24, fontWeight: 300, letterSpacing: '-.03em', lineHeight: '28px' }}>{d.name}</b><span className="pbs">{d.city}, {d.cdisp} · {d.own}{d.scale ? ' · ' + d.scale : ''}</span></div>
+          <div className="pbt"><span className="ovl">{buyer ? (d.kind === 'pharma' ? 'Big Pharma · buying assets' : 'Investor · deploying capital') : 'Company · seeking capital and partners'}</span><b style={{ fontSize: 24, fontWeight: 300, letterSpacing: '-.03em', lineHeight: '28px' }}>{d.name}</b><span className="pbs">{d.city}, {d.cdisp} · {d.own}{d.scale ? ' · ' + d.scale : ''}</span><LogoCheck d={d} /></div>
           <span className="sp" />
           <div className="acst"><div><span>{buyer ? 'INTRODUCED' : 'INTRODUCED TO'}</span><b>{I.length}</b></div><div><span>CDA OR LATER</span><b>{cda}</b></div><div><span>STRONG {buyer ? 'FITS' : 'MATCHES'}</span><b>{strong}</b></div><div><span>FIT</span><b className="fit">{d.fit}</b></div></div>
           <span className="vr" />
